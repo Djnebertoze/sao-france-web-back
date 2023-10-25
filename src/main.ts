@@ -5,7 +5,7 @@ import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   // CORS Config
-  const allowedOrigins = process.env.ALLOWED_ORIGINS.split(' ');
+  //const allowedOrigins = process.env.ALLOWED_ORIGINS.split(' ');
   const corsOptions = {
     origin: (origin, callback) => {
       console.log(origin);
