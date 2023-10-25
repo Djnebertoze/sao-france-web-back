@@ -5,7 +5,7 @@ import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   // CORS Config
-  //const allowedOrigins = process.env.ALLOWED_ORIGINS.split(' ');
+  // const allowedOrigins = process.env.ALLOWED_ORIGINS.split(' ');
   const corsOptions = {
     origin: (origin, callback) => {
       console.log(origin);
@@ -23,9 +23,9 @@ async function bootstrap() {
     cors: corsOptions,
   });
 
-  app.use(json({ limit: '50mb' }));
+  /*app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ limit: '50mb' }));
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe());*/
   await app.listen(process.env.PORT || 3001);
 }
 
