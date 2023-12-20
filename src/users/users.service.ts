@@ -54,9 +54,9 @@ export class UsersService {
     }
   }
 
-  async createUserToken(createUserTokenDto: CreateUserTokenDto) {
+  createUserToken(createUserTokenDto: CreateUserTokenDto) {
     try {
-      return await this.userTokenModel.create(createUserTokenDto);
+      return this.userTokenModel.create(createUserTokenDto);
     } catch (error) {
       throw new HttpException(
         {
@@ -70,30 +70,21 @@ export class UsersService {
 
   async findAll() {
     try {
-      return await this.userModel.find({}, [
-        'firstName',
-        'lastName',
-        'profilePicture',
-        'roles',
-        'username',
-        'email',
-        'shopPoints',
-        'bio'
-      ]);
+      const users = await this.userModel.find({})
+      const mcProfiles = await this.mcProfileModel.find({})
+      return {users:users, mcProfiles:mcProfiles};
     } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      console.log(error)
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad Request',
+      }
     }
   }
 
   async findOne(email: string) {
     try {
-      return await this.userModel.findOne({ email: email }, [
+      return this.userModel.findOne({ email: email }, [
         'email',
         'firstName',
         'lastName',
@@ -117,7 +108,7 @@ export class UsersService {
 
   async findOneByUsername(username: string) {
     try {
-      return await this.userModel.findOne({ username: username }, [
+      return this.userModel.findOne({ username: username }, [
         'email',
         'firstName',
         'lastName',
@@ -141,7 +132,7 @@ export class UsersService {
 
   async findOneAuth(email: string) {
     try {
-      return await this.userModel.findOne({ email: email }, [
+      return this.userModel.findOne({ email: email }, [
         'email',
         'password',
         'username',
@@ -159,7 +150,7 @@ export class UsersService {
 
   async findOneUserToken(userId: string) {
     try {
-      return await this.userTokenModel.findOne({ userId: userId });
+      return this.userTokenModel.findOne({ userId: userId });
     } catch (error) {
       throw new HttpException(
         {
@@ -251,7 +242,7 @@ export class UsersService {
         await this.removeUserTokenByUserId(user._id);
       }
 
-      return await this.userModel
+      return this.userModel
         .findOneAndUpdate({ _id: user._id }, updateUserDto, {
           returnOriginal: false,
         })
@@ -275,7 +266,7 @@ export class UsersService {
         email: string;
       };
       const hashed = await bcrypt.hash(updatePasswordDto.password, 10);
-      return await this.userModel.updateOne(
+      return this.userModel.updateOne(
         { email: payload.email },
         { password: hashed },
       );
@@ -290,10 +281,72 @@ export class UsersService {
     }
   }
 
+  async addShopPoints(user: UserEntity, shopPoints: number) {
+    try {
+
+      return await this.userModel.updateOne(
+        { _id: user._id },
+        { shopPoints: user.shopPoints + shopPoints },
+        { returnOriginal: false }
+      );
+    } catch (error) {
+      console.log('error', error)
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Bad request',
+        }
+    }
+  }
+
+  async removeShopPoints(user: UserEntity, shopPoints: number) {
+    try {
+      return await this.userModel.updateOne(
+        { _id: user._id },
+        { shopPoints: user.shopPoints - shopPoints },
+        { returnOriginal: false }
+      );
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      }
+    }
+  }
+
+  async addRole(user: UserEntity, roleId: string) {
+    try {
+      return await this.userModel.updateOne(
+        { _id: user._id },
+        { roles: [ ...user.roles, roleId ] },
+        { returnOriginal: false }
+      );
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      }
+    }
+  }
+
+  async removeRole(user: UserEntity, roleId: string) {
+    try {
+      return await this.userModel.updateOne(
+        { _id: user._id },
+        { roles: user.roles.filter(role => role !== roleId) },
+        { returnOriginal: false }
+      );
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      }
+    }
+  }
+
   async remove(user: UserEntity, email: string) {
     try {
       if (user.email === email) {
-        return await this.userModel.deleteOne({ email: email });
+        return this.userModel.deleteOne({ email: email });
       } else {
         throw new ForbiddenException();
       }
@@ -324,7 +377,7 @@ export class UsersService {
 
   async removeUserTokenByUserId(userId: string) {
     try {
-      return await this.userTokenModel.deleteOne({ userId: userId });
+      return this.userTokenModel.deleteOne({ userId: userId });
     } catch (error) {
       throw new HttpException(
         {
@@ -338,7 +391,7 @@ export class UsersService {
 
   async getUserByEmail(email: string) {
     try {
-      return await this.userModel
+      return this.userModel
         .findOne({ email: email })
         .select(
           '_id username firstName lastName email phoneNumber profilePicture createdAt roles birthday shopPoints bio',

@@ -50,11 +50,19 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
+  @Get()
+  getAll() {
+    return this.usersService.findAll()
+  }
+
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Post('requestXboxServices')
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   requestXboxServices(@User() user: UserEntity, @Request() req){
     return this.usersService.requestXboxServices(user, req);
   }
+
+
 
 }

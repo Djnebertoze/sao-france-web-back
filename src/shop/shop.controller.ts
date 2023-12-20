@@ -20,7 +20,7 @@ export class ShopController {
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Put("editProduct/:id")
   editProduct(@User() user: UserEntity, @Param('id') id:string, @Body() shopProductDto: ShopProductDto){
-    return this.shopService.editShopProduct(user, id, shopProductDto);
+    return this.shopService.editShopProduct(id, shopProductDto);
   }
 
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
@@ -32,12 +32,14 @@ export class ShopController {
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Get('products')
   getProducts(@User() user:UserEntity){
-    return this.shopService.getProducts(user);
+    return this.shopService.getProducts();
   }
 
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Get('product/:id')
   getProduct(@Param('id') id: string, @User() user:UserEntity){
-    return this.shopService.getProduct(id, user);
+    return this.shopService.getProduct(id);
   }
+
+
 }

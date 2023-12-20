@@ -39,7 +39,7 @@ export class AuthService {
         const newAccessToken = this.jwtService.sign(payload);
         const tokenInfos = this.jwtService.verify(newAccessToken);
 
-        return await this.usersService.createUserToken({
+        return this.usersService.createUserToken({
           accessToken: newAccessToken,
           issuedAt: tokenInfos.iat,
           expiresAt: tokenInfos.exp,
@@ -56,7 +56,7 @@ export class AuthService {
         const newAccessToken = this.jwtService.sign(payload);
         const tokenInfos = this.jwtService.verify(newAccessToken);
 
-        return await this.usersService.createUserToken({
+        return this.usersService.createUserToken({
           accessToken: newAccessToken,
           issuedAt: tokenInfos.iat,
           expiresAt: tokenInfos.exp,

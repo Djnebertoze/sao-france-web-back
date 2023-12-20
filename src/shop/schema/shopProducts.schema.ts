@@ -12,6 +12,9 @@ export class ShopProduct {
   description: string;
 
   @Prop({ required: true })
+  descriptionDetails: string;
+
+  @Prop({ required: true })
   imageUrl: string;
 
   @Prop({ required: true })
@@ -25,6 +28,15 @@ export class ShopProduct {
 
   @Prop({ required: true })
   place: number;
+
+  @Prop({ required: false })
+  stripeLink: string
+
+  @Prop({ required: false })
+  pointsToGive: number
+
+  @Prop({ required: false })
+  roleToGive: string
 }
 
 export const ShopProductSchema = SchemaFactory.createForClass(ShopProduct);

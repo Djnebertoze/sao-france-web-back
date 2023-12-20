@@ -6,9 +6,11 @@ import { json, urlencoded } from 'express';
 async function bootstrap() {
   // CORS Config
   // const allowedOrigins = process.env.ALLOWED_ORIGINS.split(' ');
+  let count = 0
   const corsOptions = {
     origin: (origin, callback) => {
-      console.log(origin);
+      count++;
+      console.log(origin, count);
       //if (allowedOrigins.indexOf(origin) !== -1 || origin === undefined) {
         callback(null, true);
       //} else {

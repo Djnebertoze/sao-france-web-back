@@ -5,4 +5,10 @@ export class ShopProductDto {
     isRealMoney?: boolean;
     imageUrl?: string;
     categorieId?: string;
+    stripeLink?: string;
+    descriptionDetails?: string;
+    // Only if categorieId == points
+    pointsToGive?: number
+    // Only if categorieId == grades
+    roleToGive?: string
 }

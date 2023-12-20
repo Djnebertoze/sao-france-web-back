@@ -5,9 +5,11 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ShopProduct, ShopProductDocument } from "./schema/shopProducts.schema";
 import { UsersService } from "../users/users.service";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class ShopService {
+
 
   constructor(
     @InjectModel(ShopProduct.name, 'app-db') private shopProductModel: Model<ShopProductDocument>,
@@ -26,12 +28,11 @@ export class ShopService {
       const categorieId:string = createShopProductDto.categorieId;
       const isRealMoney:boolean = createShopProductDto.isRealMoney;
       const imageUrl:string = createShopProductDto.imageUrl;
+      const stripeLink:string = createShopProductDto.stripeLink;
+      const descriptionDetails:string = createShopProductDto.descriptionDetails
+      const pointsToGive:number = createShopProductDto.pointsToGive
+      const roleToGive:string = createShopProductDto.roleToGive
       console.log('ok1')
-
-      /*const newProduct = await this.shopProductModel.create({
-        ...createShopProductDto,
-        place: place
-      })*/
 
       await this.shopProductModel.create({
         place: place,
@@ -41,6 +42,10 @@ export class ShopService {
         price: price,
         isRealMoney: isRealMoney,
         imageUrl: imageUrl,
+        stripLink: stripeLink,
+        descriptionDetails: descriptionDetails,
+        pointsToGive: pointsToGive,
+        roleToGive: roleToGive
       })
 
       console.log('ok2')
@@ -52,9 +57,10 @@ export class ShopService {
     }
   }
 
-  async editShopProduct(user:UserEntity, id: string, shopProductDto:ShopProductDto){
-    try {
 
+
+  async editShopProduct(id: string, shopProductDto:ShopProductDto){
+    try {
       await this.shopProductModel.findOneAndUpdate({_id: id}, shopProductDto)
 
       return { success: true };
@@ -72,23 +78,43 @@ export class ShopService {
       return { success: true };
 
     } catch (e: any) {
-      return { success: true, error: e }
+      return { success: false, error: e }
     }
   }
 
-  async getProducts(user:UserEntity){
+  async getProducts(){
     try {
-      return {products: await this.shopProductModel.find({}, "_id name description price isRealMoney imageUrl categorieId place"), success: true};
+      return {
+        products: await this.shopProductModel.find(), success: true
+      };
     } catch (error:any){
       return { ...error, success: false };
     }
   }
 
-  async getProduct(productId:string, user:UserEntity){
+  async getProduct(productId:string){
     try {
-      return {product: await this.shopProductModel.findOne({_id: productId}, "_id name description price isRealMoney imageUrl categorieId place"), success: true};
+      return {product: await this.shopProductModel.findOne({_id: productId}), success: true};
     } catch (error:any){
       return { ...error, success: false };
     }
+  }
+
+  async collectProduct(productId: string, user:UserEntity) {
+    const product = await this.getProduct(productId).then((product) => product.product);
+
+    if (product.categorieId == 'grades'){
+
+      await this.usersServices.addRole(user, product.roleToGive)
+
+    } else if (product.categorieId == 'points') {
+
+      await this.usersServices.addShopPoints(user, product.pointsToGive)
+
+    } else if (product.categorieId == 'cosmetiques') {
+      // TODO: Give cosmetics
+    }
+    console.log('Gave ' + product.name + ' to ' + user.username)
+    return true;
   }
 }

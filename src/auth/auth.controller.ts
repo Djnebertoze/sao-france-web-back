@@ -10,6 +10,6 @@ export class AuthController {
   //@UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    return this.authService.getOrGenerateJwt(req.body);
+    return await this.authService.getOrGenerateJwt(req.body);
   }
 }
