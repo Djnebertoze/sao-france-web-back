@@ -26,8 +26,8 @@ export class AppService {
 
     shopProducts.products.map((shopProduct) => {
       if (shopProduct.isRealMoney && shopProduct.stripeLink){
-        const stripePrice = stripePrices.data.filter((stripePrice) => stripePrice.id === stripeProducts.data.filter((stripeProduct) => stripeProduct.id === shopProduct.stripeLink)[0].default_price)[0].unit_amount / 100;
-        if (stripePrice != shopProduct.price){
+        const stripePrice = stripePrices.data.filter((stripePrice) => stripePrice.id === stripeProducts.data.filter((stripeProduct) => stripeProduct.id === shopProduct.stripeLink)[0].default_price)[0]?.unit_amount / 100;
+        if (stripePrice && stripePrice != shopProduct.price){
           const shopProductId = shopProduct._id.toString().match(/[^"]*/i)[0]
           this.shopService.editShopProduct(shopProductId, {
             name: shopProduct.name,
