@@ -35,6 +35,12 @@ export class AuthService {
           message: 'Cannot find user'
         }
       }
+      if(!this.validateUser(currentUser.email, user.password)){
+        return {
+          status: 401,
+          message: 'Wrong password'
+        }
+      }
       console.log('1')
       const userToken = await this.usersService.findOneUserToken(
         currentUser._id,
