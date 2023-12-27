@@ -88,6 +88,7 @@ export class ShopService {
         products: await this.shopProductModel.find(), success: true
       };
     } catch (error:any){
+      console.log(error)
       return { ...error, success: false };
     }
   }

@@ -23,15 +23,25 @@ export class AuthService {
   }
 
   async getOrGenerateJwt(user: User) {
+    console.log('mmmh')
     try {
       const currentUser: UserEntity = await this.usersService.findOneByUsername(
         user.username,
       );
+      if(!currentUser){
+        console.log('Cant find')
+        return {
+          status: 404,
+          message: 'Cannot find user'
+        }
+      }
+      console.log('1')
       const userToken = await this.usersService.findOneUserToken(
         currentUser._id,
       );
-
+      console.log('2')
       const payload = { _id: currentUser._id, email: currentUser.email };
+      console.log('3')
 
       //if (currentUser.isVerified === true) {
       // Creates a new Token
@@ -65,12 +75,15 @@ export class AuthService {
           lastName: currentUser.lastName,
         });
       }
+      console.log('mmh')
 
       return userToken;
       /*} else {
         throw new ForbiddenException();
       }*/
     } catch (error) {
+      console.log('ah')
+      console.log(error)
       throw new HttpException(
         {
           statusCode: error.status,
