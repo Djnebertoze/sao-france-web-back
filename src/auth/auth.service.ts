@@ -35,7 +35,7 @@ export class AuthService {
           message: 'Cannot find user'
         }
       }
-      if(!this.validateUser(currentUser.email, user.password)){
+      if(!await this.validateUser(currentUser.email, user.password)){
         return {
           status: 401,
           message: 'Wrong password'
