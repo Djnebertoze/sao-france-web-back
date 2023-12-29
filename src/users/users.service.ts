@@ -345,31 +345,33 @@ export class UsersService {
 
   async removeShopPoints(user: UserEntity, shopPoints: number) {
     try {
-      return await this.userModel.updateOne(
+      await this.userModel.updateOne(
         { _id: user._id },
         { shopPoints: user.shopPoints - shopPoints },
         { returnOriginal: false }
       );
+      return true
     } catch (error) {
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      }
+      console.log(error)
+      return false;
     }
   }
 
   async addRole(user: UserEntity, roleId: string) {
     try {
-      return await this.userModel.updateOne(
+
+      if (user.roles.join(',').includes(roleId)){
+        return false
+      }
+
+      await this.userModel.updateOne(
         { _id: user._id },
         { roles: [ ...user.roles, roleId ] },
         { returnOriginal: false }
       );
+      return true;
     } catch (error) {
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      }
+      return false;
     }
   }
 

@@ -1,13 +1,15 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from "@nestjs/common";
 import { ShopController } from './shop.controller';
 import { ShopService } from './shop.service';
 import { MongooseModule } from "@nestjs/mongoose";
 import { ShopProduct, ShopProductSchema } from "./schema/shopProducts.schema";
 import { UsersModule } from "../users/users.module";
+import { TransactionsModule } from "../transactions/transactions.module";
 
 @Module({
   imports: [
     UsersModule,
+    TransactionsModule,
     MongooseModule.forFeatureAsync(
       [
         {

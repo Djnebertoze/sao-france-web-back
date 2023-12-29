@@ -20,7 +20,7 @@ export class ShopProduct {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   isRealMoney: boolean;
 
   @Prop({ required: true })

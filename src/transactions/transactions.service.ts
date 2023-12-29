@@ -5,13 +5,16 @@ import { InjectModel } from "@nestjs/mongoose";
 import { UsersService } from "../users/users.service";
 import { CreateTransactionDto } from "./dto/createTransactionDto";
 import { ShopService } from "../shop/shop.service";
+import { MailSenderService } from "../mail-sender/mail-sender.service";
+import { MailType } from "../mail-sender/mails/mailTypes.enum";
 
 @Injectable()
 export class TransactionsService {
   constructor(
     @InjectModel(Transaction.name, 'app-db') private transactionModel: Model<TransactionDocument>,
     private usersService: UsersService,
-    private shopService: ShopService
+    private shopService: ShopService,
+    private mailSenderService: MailSenderService,
   ) {}
 
   async createTransaction(createTransactionDto: CreateTransactionDto) {
@@ -29,6 +32,12 @@ export class TransactionsService {
       });
 
       await this.shopService.collectProduct(createTransactionDto.shopProductId, createTransactionDto.author)
+
+      await this.mailSenderService.sendMail({
+        receiverEmail: createTransactionDto.author.email,
+        subject: `Merci pour votre achat ${createTransactionDto.productName} x1 !`,
+        mailType: MailType.PRODUCT_BUY
+      }, {product_name: createTransactionDto.productName, product_price:createTransactionDto.cost, isRealMoney:createTransactionDto.isRealMoney ? true : false})
 
       return {
         statusCode: HttpStatus.CREATED,

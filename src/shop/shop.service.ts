@@ -1,10 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { UserEntity } from "../users/entities/user.entity";
 import { ShopProductDto } from "./dto/shopProductDto";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ShopProduct, ShopProductDocument } from "./schema/shopProducts.schema";
 import { UsersService } from "../users/users.service";
+import { TransactionsService } from "../transactions/transactions.service";
 
 @Injectable()
 export class ShopService {
@@ -12,7 +13,9 @@ export class ShopService {
 
   constructor(
     @InjectModel(ShopProduct.name, 'app-db') private shopProductModel: Model<ShopProductDocument>,
-    private usersServices: UsersService
+    private usersServices: UsersService,
+    @Inject(forwardRef(() => TransactionsService))
+    private transactionsService: TransactionsService
   ) {}
 
   async createShopProduct(user: UserEntity, createShopProductDto: ShopProductDto){
@@ -48,6 +51,7 @@ export class ShopService {
 
 
     } catch (e: any) {
+      console.log(e)
       return { success: true, error: e }
     }
   }
@@ -112,5 +116,60 @@ export class ShopService {
     }
     console.log('Gave ' + product.name + ' to ' + user.username)
     return true;
+  }
+
+  async payProductWithShopPoints(productId: string, user:UserEntity) {
+    const product = await this.getProduct(productId).then((product) => product.product);
+    if(!product){
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Produit introuvable.'
+      }
+    }
+
+    if (product.isRealMoney){
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Impossible de payer avec des points boutique.'
+      }
+    }
+
+    if (user.shopPoints < product.price){
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Solde insuffisant.'
+      }
+    }
+
+    try {
+      const removedPoints = await this.usersServices.removeShopPoints(user, product.price)
+      if(removedPoints){
+        await this.transactionsService.createTransaction({
+          author: user,
+          shopProductId: productId,
+          isRealMoney: false,
+          status: 'confirmed',
+          cost: product.price,
+          productName: product.name
+        })
+        return {
+          status: HttpStatus.CREATED
+        }
+      } else {
+        return {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Impossible de retirer les points'
+        }
+      }
+
+    } catch (error){
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: error,
+        message: 'Erreur interne lors de la transaction.'
+      }
+    }
+
   }
 }

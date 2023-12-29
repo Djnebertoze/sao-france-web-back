@@ -10,7 +10,7 @@ import { MailType } from "./mails/mailTypes.enum";
 
 @Injectable()
 export class MailSenderService {
-  async sendMail(sendMailDto: SendMailDto) {
+  async sendMail(sendMailDto: SendMailDto, ...data_to_insert: any[] | undefined) {
     const readFile = promisify(fs.readFile);
 
     let pathToFile;
@@ -21,6 +21,10 @@ export class MailSenderService {
         pathToFile = '../../emails/user/registration.html'
         data = { action_url: `${process.env.FRONT_CLIENT_URL}/profile` }
         break;
+      case MailType.PRODUCT_BUY:
+        pathToFile = '../../emails/shop/product-buy.html'
+        data = { action_url: `${process.env.FRONT_CLIENT_URL}/profile`, ...data_to_insert}
+        break
       default:
         console.log('Imossible de trouver le mail: ', sendMailDto.mailType, ` ("${sendMailDto.subject}")`)
         return {

@@ -5,10 +5,13 @@ import { UniqueJwtGuard } from "../auth/guards/unique-jwt.guard";
 import { User } from "../auth/decorators/users.decorator";
 import { UserEntity } from "../users/entities/user.entity";
 import { ShopProductDto } from "./dto/shopProductDto";
+import { TransactionsService } from "../transactions/transactions.service";
 
 @Controller('shop')
 export class ShopController {
-  constructor(private readonly shopService: ShopService) {}
+  constructor(
+    private readonly shopService: ShopService,
+  ) {}
 
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Post("createProduct")
@@ -37,6 +40,12 @@ export class ShopController {
   @Get('product/:id')
   getProduct(@Param('id') id: string){
     return this.shopService.getProduct(id);
+  }
+
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
+  @Post('pay/:id')
+  payProduct(@User() user: UserEntity, @Param('id') productId:string){
+    return this.shopService.payProductWithShopPoints(productId, user);
   }
 
 
