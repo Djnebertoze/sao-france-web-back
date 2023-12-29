@@ -5,7 +5,6 @@ import { UniqueJwtGuard } from "../auth/guards/unique-jwt.guard";
 import { User } from "../auth/decorators/users.decorator";
 import { UserEntity } from "../users/entities/user.entity";
 import { ShopProductDto } from "./dto/shopProductDto";
-import { RolesGuard } from "../auth/guards/roles.guard";
 
 @Controller('shop')
 export class ShopController {
@@ -36,7 +35,7 @@ export class ShopController {
 
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Get('product/:id')
-  getProduct(@Param('id') id: string, @User() user:UserEntity){
+  getProduct(@Param('id') id: string){
     return this.shopService.getProduct(id);
   }
 

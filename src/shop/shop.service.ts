@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import { UserEntity } from "../users/entities/user.entity";
 import { ShopProductDto } from "./dto/shopProductDto";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ShopProduct, ShopProductDocument } from "./schema/shopProducts.schema";
 import { UsersService } from "../users/users.service";
-import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class ShopService {

@@ -1,25 +1,11 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Put,
-  Query, Request,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Body, Controller, Get, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { UsersService } from "./users.service";
+import { CreateUserDto } from "./dto/create-user.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { UniqueJwtGuard } from "../auth/guards/unique-jwt.guard";
 import { UserEntity } from "./entities/user.entity";
-import { User } from 'src/auth/decorators/users.decorator';
+import { User } from "src/auth/decorators/users.decorator";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { GetMicrosoftAccessTokenDto } from "./dto/get-microsoft-access-token.dto";
 
 
 @Controller('users')

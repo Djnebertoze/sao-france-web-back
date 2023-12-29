@@ -3,7 +3,6 @@ import { Model } from "mongoose";
 import { Transaction, TransactionDocument } from "./schema/transactions.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { UsersService } from "../users/users.service";
-import { StripeService } from "../stripe/stripe.service";
 import { CreateTransactionDto } from "./dto/createTransactionDto";
 import { ShopService } from "../shop/shop.service";
 

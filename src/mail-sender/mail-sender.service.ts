@@ -1,12 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import { SendMailDto } from './dto/sendMailDto';
-import { promisify } from 'util';
-import * as fs from 'fs';
-import { compile } from 'handlebars';
-import { resolve } from 'path';
+import { Injectable } from "@nestjs/common";
+import * as nodemailer from "nodemailer";
+import { SendMailDto } from "./dto/sendMailDto";
+import { promisify } from "util";
+import * as fs from "fs";
+import { compile } from "handlebars";
+import { resolve } from "path";
 import { MailType } from "./mails/mailTypes.enum";
-
 
 
 @Injectable()
@@ -28,7 +27,6 @@ export class MailSenderService {
           status: 404,
           message: 'Email inexistant'
         }
-        break;
     }
 
     const htmlFile = await readFile(resolve(__dirname, pathToFile), 'utf8');

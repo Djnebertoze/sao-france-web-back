@@ -1,8 +1,7 @@
-import { Get, HttpStatus, Injectable, RawBodyRequest } from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { UsersService } from "../users/users.service";
 
-import Stripe from 'stripe'
-import { Cron, CronExpression } from "@nestjs/schedule";
+import Stripe from "stripe";
 import { UserEntity } from "../users/entities/user.entity";
 import * as process from "process";
 import { TransactionsService } from "../transactions/transactions.service";

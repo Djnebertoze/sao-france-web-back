@@ -1,10 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { UsersService } from "./users/users.service";
-import { JwtService } from "@nestjs/jwt";
 import { StripeService } from "./stripe/stripe.service";
 import { ShopService } from "./shop/shop.service";
-import { ShopProductDto } from "./shop/dto/shopProductDto";
 
 @Injectable()
 export class AppService {

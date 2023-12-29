@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -221,12 +221,10 @@ export class UsersService {
         'uuid'
       ])
 
-      const combinedResponse = {
+      return {
         user: userProfile,
         mcProfile: mcProfile
-      }
-
-      return combinedResponse;
+      };
     } catch (error) {
       throw new HttpException(
         {
@@ -254,13 +252,10 @@ export class UsersService {
         'skinUrl',
         'skinVariant'
       ])
-
-      const combinedResponse = {
+      return {
         user: userProfile,
         mcProfile: mcProfile
-      }
-
-      return combinedResponse;
+      };
     } catch (error) {
       throw new HttpException(
         {
@@ -398,16 +393,14 @@ export class UsersService {
       if (user.email === email) {
         return this.userModel.deleteOne({ email: email });
       } else {
-        throw new ForbiddenException();
+        return null;
       }
     } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: error.status,
-          message: error.message,
-        },
-        error.status,
-      );
+      console.log(error)
+      return {
+        status: 500,
+        error: error
+      }
     }
   }
 
@@ -569,23 +562,17 @@ export class UsersService {
 
               const expires_in = mc_auth_response.data.expires_in
               mc_access_token = mc_auth_response.data.access_token;
-
-              const oldTokens = await this.signatureTokensModel.deleteMany({
+              await this.signatureTokensModel.deleteMany({
                 user: user._id,
                 type: "minecraft_access_token"
               });
-
-
-
-              const newSignature = this.signatureTokensModel.create({
+              await this.signatureTokensModel.create({
                 type: "minecraft_access_token",
                 token: mc_access_token,
                 issuedAt: new Date().getTime(),
                 expiresAt: new Date().getTime() + expires_in,
                 user: user
-              })
-
-
+              });
             }
 
 
@@ -630,35 +617,29 @@ export class UsersService {
               const mc_data_profile = mc_get_profile_response.data;
 
               const activeSkin = mc_data_profile.skins.find(skin => skin.state === "ACTIVE");
-
-
-              const oldAccounts = await this.mcProfileModel.deleteMany({
+              await this.mcProfileModel.deleteMany({
                 user: user._id
-              })
-
+              });
               if(activeSkin){
-                const newMcProfile = this.mcProfileModel.create({
+                await this.mcProfileModel.create({
                   name: mc_data_profile.name,
                   uuid: mc_data_profile.id,
                   skinUrl: activeSkin.url,
                   skinVariant: activeSkin.variant,
                   user: user
-                })
+                });
               } else {
-                const newMcProfile = this.mcProfileModel.create({
+                await this.mcProfileModel.create({
                   name: mc_data_profile.name,
                   uuid: mc_data_profile.id,
                   user: user
-                })
+                });
               }
 
-              const combinedResponse = {
+              return {
                 hasMinecraft: true,
                 profile: mc_data_profile,
               };
-
-
-              return combinedResponse;
             }
 
 
