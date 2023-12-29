@@ -29,9 +29,8 @@ export class ShopController {
     return this.shopService.removeShopProduct(user, id);
   }
 
-  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Get('products')
-  getProducts(@User() user:UserEntity){
+  getProducts(){
     return this.shopService.getProducts();
   }
 
