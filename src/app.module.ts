@@ -14,6 +14,7 @@ import { TransactionsService } from './transactions/transactions.service';
 import { TransactionsController } from './transactions/transactions.controller';
 import { TransactionsModule } from './transactions/transactions.module';
 import * as process from "process";
+import { MailSenderService } from "./mail-sender/mail-sender.service";
 
 @Module({
   imports: [
@@ -38,6 +39,6 @@ import * as process from "process";
     StripeModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MailSenderService],
 })
 export class AppModule {}

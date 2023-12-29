@@ -12,6 +12,7 @@ import { LocalStrategy } from "../auth/strategies/local.strategy";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 import { PassportModule } from "@nestjs/passport";
 import { ConfigModule } from "@nestjs/config";
+import { MailSenderService } from "../mail-sender/mail-sender.service";
 
 @Module({
   imports: [
@@ -52,7 +53,7 @@ import { ConfigModule } from "@nestjs/config";
     ),
   ],
   controllers: [UsersController],
-  providers: [UsersService, JwtStrategy],
+  providers: [UsersService, JwtStrategy, MailSenderService],
   exports: [UsersService],
 })
 export class UsersModule {}

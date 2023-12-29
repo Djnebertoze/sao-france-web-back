@@ -1,26 +1,20 @@
-import {
-  ForbiddenException,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, PipelineStage } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './schema/users.schema';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
-import { UserEntity } from './entities/user.entity';
-import { UserToken, UserTokenDocument } from './schema/usersTokens.schema';
-import { CreateUserTokenDto } from './dto/create-userToken.dto';
+import { ForbiddenException, HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { User, UserDocument } from "./schema/users.schema";
+import * as bcrypt from "bcrypt";
+import * as jwt from "jsonwebtoken";
+import { UserEntity } from "./entities/user.entity";
+import { UserToken, UserTokenDocument } from "./schema/usersTokens.schema";
+import { CreateUserTokenDto } from "./dto/create-userToken.dto";
 import axios from "axios";
-import { GetMicrosoftAccessTokenDto } from "./dto/get-microsoft-access-token.dto";
-import { response } from "express";
 import { SignatureTokens, SignatureTokensDocument } from "./schema/signatureTokens.schema";
 import { McProfile, McProfileDocument } from "./schema/mcProfiles.schema";
-import { JwtService } from '@nestjs/jwt';
+import { JwtService } from "@nestjs/jwt";
+import { MailSenderService } from "../mail-sender/mail-sender.service";
+import { MailType } from "../mail-sender/mails/mailTypes.enum";
 
 
 @Injectable()
@@ -31,6 +25,7 @@ export class UsersService {
     @InjectModel(SignatureTokens.name, 'app-db') private signatureTokensModel: Model<SignatureTokensDocument>,
     @InjectModel(McProfile.name, 'app-db') private mcProfileModel: Model<McProfileDocument>,
     private jwtService: JwtService,
+    private mailSenderService: MailSenderService
 
   ) {}
 
@@ -56,14 +51,18 @@ export class UsersService {
         });
 
         if (newUser._id) {
-          // TODO: Send confirmation email
+
 
           const payload = { _id: newUser._id, email: newUser.email };
 
           const newAccessToken = this.jwtService.sign(payload);
           const tokenInfos = this.jwtService.verify(newAccessToken);
 
-          console.log('ok')
+          await this.mailSenderService.sendMail({
+            receiverEmail: newUser.email,
+            subject: 'Bienvenu(e) chez SaoFranceMc !',
+            mailType: MailType.FIRST_REGISTER
+          })
 
           return this.createUserToken({
             accessToken: newAccessToken,
@@ -74,7 +73,6 @@ export class UsersService {
             lastName: newUser.lastName,
           });
         } else {
-          console.log('non')
           await this.userModel.deleteOne({username: createUserDto.username})
           return {
             message: "Problème interne lors de la cration de votre compte."
