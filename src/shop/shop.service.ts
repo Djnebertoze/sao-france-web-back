@@ -40,7 +40,7 @@ export class ShopService {
         price: price,
         isRealMoney: isRealMoney,
         imageUrl: imageUrl,
-        stripLink: stripeLink,
+        stripeLink: stripeLink,
         descriptionDetails: descriptionDetails,
         pointsToGive: pointsToGive,
         roleToGive: roleToGive
