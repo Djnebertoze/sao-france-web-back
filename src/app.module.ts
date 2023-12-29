@@ -22,7 +22,7 @@ import * as process from "process";
     MongooseModule.forRootAsync({
       useFactory: () => ({
         uri: process.env.APP_DATABASE_URL,
-        dbName: process.env.ENV == 'production' ? 'production' : 'test',
+        dbName: process.env.NODE_ENV == 'production' ? 'production' : 'test',
         connectionFactory: (connection) => {
           connection.plugin(require('mongoose-unique-validator'));
           connection.plugin(require('mongoose-autopopulate'));
