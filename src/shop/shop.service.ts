@@ -21,7 +21,6 @@ export class ShopService {
     try {
 
       const place = await this.shopProductModel.countDocuments({categorieId: createShopProductDto.categorieId});
-      console.log('ok')
       const price:number = createShopProductDto.price;
       const name:string = createShopProductDto.name;
       const description:string = createShopProductDto.description;
@@ -32,7 +31,6 @@ export class ShopService {
       const descriptionDetails:string = createShopProductDto.descriptionDetails
       const pointsToGive:number = createShopProductDto.pointsToGive
       const roleToGive:string = createShopProductDto.roleToGive
-      console.log('ok1')
 
       await this.shopProductModel.create({
         place: place,
@@ -47,8 +45,6 @@ export class ShopService {
         pointsToGive: pointsToGive,
         roleToGive: roleToGive
       })
-
-      console.log('ok2')
       return { success: true };
 
 

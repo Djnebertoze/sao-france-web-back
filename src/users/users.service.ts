@@ -20,6 +20,8 @@ import { GetMicrosoftAccessTokenDto } from "./dto/get-microsoft-access-token.dto
 import { response } from "express";
 import { SignatureTokens, SignatureTokensDocument } from "./schema/signatureTokens.schema";
 import { McProfile, McProfileDocument } from "./schema/mcProfiles.schema";
+import { JwtService } from '@nestjs/jwt';
+
 
 @Injectable()
 export class UsersService {
@@ -28,29 +30,65 @@ export class UsersService {
     @InjectModel(UserToken.name, 'app-db') private userTokenModel: Model<UserTokenDocument>,
     @InjectModel(SignatureTokens.name, 'app-db') private signatureTokensModel: Model<SignatureTokensDocument>,
     @InjectModel(McProfile.name, 'app-db') private mcProfileModel: Model<McProfileDocument>,
+    private jwtService: JwtService,
+
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    console.log(process.env.JWT_SECRET)
     const hashed = await bcrypt.hash(createUserDto.password, 10);
 
     try {
-      const newUser = await this.userModel.create({
-        ...createUserDto,
-        password: hashed,
-      });
+      if (await this.userModel.exists({email: createUserDto.email})){
+        return {
+          status:400,
+          message: 'Email déjà utilisée !'
+        }
+      } else if(await this.userModel.exists({username: createUserDto.username})){
+        return {
+          status:400,
+          message: 'Nom d\'utilisateur déjà utilisé !'
+        }
+      } else {
+        const newUser = await this.userModel.create({
+          ...createUserDto,
+          password: hashed,
+        });
 
-      if (newUser._id) {
-        // TODO: Send confirmation email
+        if (newUser._id) {
+          // TODO: Send confirmation email
+
+          const payload = { _id: newUser._id, email: newUser.email };
+
+          const newAccessToken = this.jwtService.sign(payload);
+          const tokenInfos = this.jwtService.verify(newAccessToken);
+
+          console.log('ok')
+
+          return this.createUserToken({
+            accessToken: newAccessToken,
+            issuedAt: tokenInfos.iat,
+            expiresAt: tokenInfos.exp,
+            userId: newUser._id,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+          });
+        } else {
+          console.log('non')
+          await this.userModel.deleteOne({username: createUserDto.username})
+          return {
+            message: "Problème interne lors de la cration de votre compte."
+          }
+        }
       }
-      return { registerSuccess: true };
     } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: error.errors,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      console.log(error)
+      try {
+        await this.userModel.deleteOne({username: createUserDto.username})
+      } catch (error){ }
+      return {
+        message: "Problème interne lors de la cration de votre compte."
+      }
     }
   }
 
@@ -238,6 +276,20 @@ export class UsersService {
 
   async update(user: UserEntity, updateUserDto: UpdateUserDto) {
     try {
+
+      if (user.username != updateUserDto.username && await this.userModel.exists({username:updateUserDto.username})){
+        return {
+          status: 400,
+          message: 'Nom d\'utilisateur déjà utilisé.'
+        }
+      }
+      if (user.email != updateUserDto.email && await this.userModel.exists({email:updateUserDto.email})){
+        return {
+          status: 400,
+          message: 'Email déjà utilisée.'
+        }
+      }
+
       if (updateUserDto.email && updateUserDto.email !== user.email) {
         await this.removeUserTokenByUserId(user._id);
       }

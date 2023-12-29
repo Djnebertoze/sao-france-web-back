@@ -7,9 +7,20 @@ import { UserToken, UserTokenSchema } from './schema/usersTokens.schema';
 import { SignatureTokens, SignatureTokensSchema } from "./schema/signatureTokens.schema";
 import { McProfile, McProfileSchema } from "./schema/mcProfiles.schema";
 import { ShopModule } from "../shop/shop.module";
+import { JwtModule } from "@nestjs/jwt";
+import { LocalStrategy } from "../auth/strategies/local.strategy";
+import { JwtStrategy } from "../auth/strategies/jwt.strategy";
+import { PassportModule } from "@nestjs/passport";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
+    PassportModule,
+    ConfigModule.forRoot(),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_EXPIRATION },
+    }),
     MongooseModule.forFeatureAsync(
       [
         {
@@ -41,7 +52,7 @@ import { ShopModule } from "../shop/shop.module";
     ),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, JwtStrategy],
   exports: [UsersService],
 })
 export class UsersModule {}
