@@ -17,10 +17,10 @@ export class UserToken {
   @Prop({ unique: true, required: true })
   userId: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   firstName: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   lastName: string;
 }
 

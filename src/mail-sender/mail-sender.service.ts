@@ -10,21 +10,34 @@ import { MailType } from "./mails/mailTypes.enum";
 
 @Injectable()
 export class MailSenderService {
-  async sendMail(sendMailDto: SendMailDto, ...data_to_insert: any[] | undefined) {
+  async sendMail(sendMailDto: SendMailDto, data_to_insert:any) {
     const readFile = promisify(fs.readFile);
 
     let pathToFile;
-    let data;
+    let data = {};
 
     switch (sendMailDto.mailType){
+
       case MailType.FIRST_REGISTER:
         pathToFile = '../../emails/user/registration.html'
         data = { action_url: `${process.env.FRONT_CLIENT_URL}/profile` }
         break;
+
       case MailType.PRODUCT_BUY:
         pathToFile = '../../emails/shop/product-buy.html'
-        data = { action_url: `${process.env.FRONT_CLIENT_URL}/profile`, ...data_to_insert}
+        data = { action_url: `${process.env.FRONT_CLIENT_URL}/profile`}
+        data = Object.assign({}, data, data_to_insert)
         break
+
+      case MailType.RESET_PASSWORD:
+        pathToFile = '../../emails/user/reset-password-request.html'
+        data = Object.assign({}, data, data_to_insert)
+        break
+      case MailType.CHANGE_PASSWORD_SUCCESS:
+        pathToFile = '../../emails/user/change-password-success.html'
+        data = Object.assign({}, data, data_to_insert)
+        break
+
       default:
         console.log('Imossible de trouver le mail: ', sendMailDto.mailType, ` ("${sendMailDto.subject}")`)
         return {
@@ -55,6 +68,10 @@ export class MailSenderService {
         html: htmlToSend, // html body
       };
       await transporter.sendMail(mailOptions);
+      return {
+        status: 200,
+        message: 'Email envoyé avec succès.'
+      }
     } catch (error) {
       console.log(error)
       return {

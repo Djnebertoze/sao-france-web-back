@@ -15,39 +15,40 @@ import { McProfile, McProfileDocument } from "./schema/mcProfiles.schema";
 import { JwtService } from "@nestjs/jwt";
 import { MailSenderService } from "../mail-sender/mail-sender.service";
 import { MailType } from "../mail-sender/mails/mailTypes.enum";
+import * as process from "process";
 
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name, 'app-db') private userModel: Model<UserDocument>,
-    @InjectModel(UserToken.name, 'app-db') private userTokenModel: Model<UserTokenDocument>,
-    @InjectModel(SignatureTokens.name, 'app-db') private signatureTokensModel: Model<SignatureTokensDocument>,
-    @InjectModel(McProfile.name, 'app-db') private mcProfileModel: Model<McProfileDocument>,
+    @InjectModel(User.name, "app-db") private userModel: Model<UserDocument>,
+    @InjectModel(UserToken.name, "app-db") private userTokenModel: Model<UserTokenDocument>,
+    @InjectModel(SignatureTokens.name, "app-db") private signatureTokensModel: Model<SignatureTokensDocument>,
+    @InjectModel(McProfile.name, "app-db") private mcProfileModel: Model<McProfileDocument>,
     private jwtService: JwtService,
     private mailSenderService: MailSenderService
-
-  ) {}
+  ) {
+  }
 
   async create(createUserDto: CreateUserDto) {
-    console.log(process.env.JWT_SECRET)
+    console.log(process.env.JWT_SECRET);
     const hashed = await bcrypt.hash(createUserDto.password, 10);
 
     try {
-      if (await this.userModel.exists({email: createUserDto.email})){
+      if (await this.userModel.exists({ email: createUserDto.email })) {
         return {
-          status:400,
-          message: 'Email déjà utilisée !'
-        }
-      } else if(await this.userModel.exists({username: createUserDto.username})){
+          status: 400,
+          message: "Email déjà utilisée !"
+        };
+      } else if (await this.userModel.exists({ username: createUserDto.username })) {
         return {
-          status:400,
-          message: 'Nom d\'utilisateur déjà utilisé !'
-        }
+          status: 400,
+          message: "Nom d'utilisateur déjà utilisé !"
+        };
       } else {
         const newUser = await this.userModel.create({
           ...createUserDto,
-          password: hashed,
+          password: hashed
         });
 
         if (newUser._id) {
@@ -60,9 +61,9 @@ export class UsersService {
 
           await this.mailSenderService.sendMail({
             receiverEmail: newUser.email,
-            subject: 'Bienvenu(e) chez SaoFranceMc !',
+            subject: "Bienvenu(e) chez SaoFranceMc !",
             mailType: MailType.FIRST_REGISTER
-          })
+          }, {});
 
           return this.createUserToken({
             accessToken: newAccessToken,
@@ -70,23 +71,24 @@ export class UsersService {
             expiresAt: tokenInfos.exp,
             userId: newUser._id,
             firstName: newUser.firstName,
-            lastName: newUser.lastName,
+            lastName: newUser.lastName
           });
         } else {
-          await this.userModel.deleteOne({username: createUserDto.username})
+          await this.userModel.deleteOne({ username: createUserDto.username });
           return {
             message: "Problème interne lors de la cration de votre compte."
-          }
+          };
         }
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       try {
-        await this.userModel.deleteOne({username: createUserDto.username})
-      } catch (error){ }
+        await this.userModel.deleteOne({ username: createUserDto.username });
+      } catch (error) {
+      }
       return {
         message: "Problème interne lors de la cration de votre compte."
-      }
+      };
     }
   }
 
@@ -97,47 +99,47 @@ export class UsersService {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
 
   async findAll() {
     try {
-      const users = await this.userModel.find({})
-      const mcProfiles = await this.mcProfileModel.find({})
-      return {users:users, mcProfiles:mcProfiles};
+      const users = await this.userModel.find({});
+      const mcProfiles = await this.mcProfileModel.find({});
+      return { users: users, mcProfiles: mcProfiles };
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return {
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad Request',
-      }
+        message: "Bad Request"
+      };
     }
   }
 
   async findOne(email: string) {
     try {
       return this.userModel.findOne({ email: email }, [
-        'email',
-        'firstName',
-        'lastName',
-        'roles',
-        'profilePicture',
-        'roles',
-        'username',
-        'shopPoints',
-        'bio',
+        "email",
+        "firstName",
+        "lastName",
+        "roles",
+        "profilePicture",
+        "roles",
+        "username",
+        "shopPoints",
+        "bio"
       ]);
     } catch (error) {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -145,23 +147,23 @@ export class UsersService {
   async findOneByUsername(username: string) {
     try {
       return this.userModel.findOne({ username: username }, [
-        'email',
-        'firstName',
-        'lastName',
-        'roles',
-        'profilePicture',
-        'roles',
-        'username',
-        'shopPoints',
-        'bio',
+        "email",
+        "firstName",
+        "lastName",
+        "roles",
+        "profilePicture",
+        "roles",
+        "username",
+        "shopPoints",
+        "bio"
       ]);
     } catch (error) {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -169,17 +171,17 @@ export class UsersService {
   async findOneAuth(email: string) {
     try {
       return this.userModel.findOne({ email: email }, [
-        'email',
-        'password',
-        'username',
+        "email",
+        "password",
+        "username"
       ]);
     } catch (error) {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -191,35 +193,35 @@ export class UsersService {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
 
-  async getUserPrivateProfile(user: UserEntity) {
+  async getUserPrivateProfile(userId: string) {
     try {
-      const userProfile = await this.userModel.findOne({ _id: user._id }, [
-        'firstName',
-        'lastName',
-        'email',
-        'profilePicture',
-        'phoneNumber',
-        'createdAt',
-        'roles',
-        'username',
-        'birthday',
-        'shopPoints',
-        'bio',
+      const userProfile = await this.userModel.findOne({ _id: userId }, [
+        "firstName",
+        "lastName",
+        "email",
+        "profilePicture",
+        "phoneNumber",
+        "createdAt",
+        "roles",
+        "username",
+        "birthday",
+        "shopPoints",
+        "bio"
       ]);
 
-      const mcProfile = await this.mcProfileModel.findOne({user: user._id}, [
-        'name',
-        'skinUrl',
-        'skinVariant',
-        'uuid'
-      ])
+      const mcProfile = await this.mcProfileModel.findOne({ user: userId }, [
+        "name",
+        "skinUrl",
+        "skinVariant",
+        "uuid"
+      ]);
 
       return {
         user: userProfile,
@@ -229,9 +231,9 @@ export class UsersService {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -239,19 +241,19 @@ export class UsersService {
   async getUserPublicProfile(id: string) {
     try {
       const userProfile = await this.userModel.findOne({ _id: id }, [
-        'firstName',
-        'profilePicture',
-        'createdAt',
-        'username',
-        'roles',
-        'bio',
+        "firstName",
+        "profilePicture",
+        "createdAt",
+        "username",
+        "roles",
+        "bio"
       ]);
 
-      const mcProfile = await this.mcProfileModel.findOne({user: id}, [
-        'name',
-        'skinUrl',
-        'skinVariant'
-      ])
+      const mcProfile = await this.mcProfileModel.findOne({ user: id }, [
+        "name",
+        "skinUrl",
+        "skinVariant"
+      ]);
       return {
         user: userProfile,
         mcProfile: mcProfile
@@ -260,9 +262,9 @@ export class UsersService {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -270,17 +272,17 @@ export class UsersService {
   async update(user: UserEntity, updateUserDto: UpdateUserDto) {
     try {
 
-      if (user.username != updateUserDto.username && await this.userModel.exists({username:updateUserDto.username})){
+      if (user.username != updateUserDto.username && await this.userModel.exists({ username: updateUserDto.username })) {
         return {
           status: 400,
-          message: 'Nom d\'utilisateur déjà utilisé.'
-        }
+          message: "Nom d'utilisateur déjà utilisé."
+        };
       }
-      if (user.email != updateUserDto.email && await this.userModel.exists({email:updateUserDto.email})){
+      if (user.email != updateUserDto.email && await this.userModel.exists({ email: updateUserDto.email })) {
         return {
           status: 400,
-          message: 'Email déjà utilisée.'
-        }
+          message: "Email déjà utilisée."
+        };
       }
 
       if (updateUserDto.email && updateUserDto.email !== user.email) {
@@ -289,18 +291,18 @@ export class UsersService {
 
       return this.userModel
         .findOneAndUpdate({ _id: user._id }, updateUserDto, {
-          returnOriginal: false,
+          returnOriginal: false
         })
         .select(
-          '_id username firstName lastName email phoneNumber profilePicture createdAt birthday roles bio',
+          "_id username firstName lastName email phoneNumber profilePicture createdAt birthday roles bio"
         );
     } catch (error) {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad request',
+          message: "Bad request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -313,15 +315,15 @@ export class UsersService {
       const hashed = await bcrypt.hash(updatePasswordDto.password, 10);
       return this.userModel.updateOne(
         { email: payload.email },
-        { password: hashed },
+        { password: hashed }
       );
     } catch (error) {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad request',
+          message: "Bad request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -335,11 +337,11 @@ export class UsersService {
         { returnOriginal: false }
       );
     } catch (error) {
-      console.log('error', error)
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad request',
-        }
+      console.log("error", error);
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Bad request"
+      };
     }
   }
 
@@ -350,9 +352,9 @@ export class UsersService {
         { shopPoints: user.shopPoints - shopPoints },
         { returnOriginal: false }
       );
-      return true
+      return true;
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return false;
     }
   }
@@ -360,13 +362,13 @@ export class UsersService {
   async addRole(user: UserEntity, roleId: string) {
     try {
 
-      if (user.roles.join(',').includes(roleId)){
-        return false
+      if (user.roles.join(",").includes(roleId)) {
+        return false;
       }
 
       await this.userModel.updateOne(
         { _id: user._id },
-        { roles: [ ...user.roles, roleId ] },
+        { roles: [...user.roles, roleId] },
         { returnOriginal: false }
       );
       return true;
@@ -385,8 +387,8 @@ export class UsersService {
     } catch (error) {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      }
+        message: "Bad request"
+      };
     }
   }
 
@@ -398,11 +400,11 @@ export class UsersService {
         return null;
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return {
         status: 500,
         error: error
-      }
+      };
     }
   }
 
@@ -413,9 +415,9 @@ export class UsersService {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -427,9 +429,9 @@ export class UsersService {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -439,16 +441,76 @@ export class UsersService {
       return this.userModel
         .findOne({ email: email })
         .select(
-          '_id username firstName lastName email phoneNumber profilePicture createdAt roles birthday shopPoints bio',
+          "_id username firstName lastName email phoneNumber profilePicture createdAt roles birthday shopPoints bio"
         );
     } catch (error) {
       throw new HttpException(
         {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
+          message: "Bad Request"
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
+    }
+  }
+
+  async sendPasswordReset(email: string) {
+    try {
+      const user = await this.userModel.findOne({ email: email });
+
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Utilisateur introuvable"
+        };
+      }
+
+      const emailToken = jwt.sign({ email: email }, process.env.PASSWORD_RESET_JWT_SECRET, {
+        expiresIn: process.env.PASSWORD_RESET_JWT_EXPIRATION
+      });
+
+      const resetUrl = process.env.FRONT_CLIENT_URL + "/profile/reset-password?token=" + emailToken;
+
+      await this.mailSenderService.sendMail({
+        receiverEmail: email,
+        subject: "Réinitialisation de votre mot de passe",
+        mailType: MailType.RESET_PASSWORD
+      }, { reset_url: resetUrl });
+
+      return {
+        status: HttpStatus.OK,
+        message: "Email envoyé avec succès."
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Erreur interne. Veuillez réessayer ultérieurement."
+      };
+    }
+  }
+
+  async resetPassword(token: string, body: { password: string }) {
+    try {
+      const payload = jwt.verify(token, process.env.PASSWORD_RESET_JWT_SECRET) as { email: string };
+      await this.userModel.updateOne(
+        { email: payload.email },
+        { password: await bcrypt.hash(body.password, 10) }
+      );
+
+      await this.mailSenderService.sendMail({
+        receiverEmail: payload.email,
+        subject: "Mot de passe changé",
+        mailType: MailType.CHANGE_PASSWORD_SUCCESS
+      }, {});
+
+      return { status:HttpStatus.OK, message: "success" };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Erreur interne. Veuillez réessayer ultérieurement."
+      };
     }
   }
 
@@ -465,124 +527,120 @@ export class UsersService {
     let xsts_response;
 
 
-      const STANDARD_HEADERS = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      }
+    const STANDARD_HEADERS = {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    };
 
     const foundToken = await this.signatureTokensModel.findOne({
       user: user._id,
       type: "minecraft_access_token",
-      expiresAt: { $gt: new Date().getTime() }, // Vérifiez si expiresAt est supérieur à la date actuelle
+      expiresAt: { $gt: new Date().getTime() } // Vérifiez si expiresAt est supérieur à la date actuelle
     });
 
 
+    /*##########################
+        Request to XBOX Services
+      ##########################*/
 
 
+    //console.log("REQUEST TO XBOX SERVICES")
+
+    const BASE_URL = "https://user.auth.xboxlive.com/user/authenticate";
+    try {
+      if (!foundToken) {
+        const response = await axios.post(
+          BASE_URL, {
+            Properties: {
+              AuthMethod: "RPS",
+              SiteName: "user.auth.xboxlive.com",
+              RpsTicket: `d=${access_token}`
+            },
+            RelyingParty: "http://auth.xboxlive.com",
+            TokenType: "JWT"
+          },
+          {
+            headers: STANDARD_HEADERS,
+            responseType: "json"
+          }
+        );
+        //console.log("RESPONSE 1", response.data)
+
+        xbox_live_token = response.data.Token;
+
+      }
 
       /*##########################
-          Request to XBOX Services
+         Request to XSTS Services
         ##########################*/
 
 
-      //console.log("REQUEST TO XBOX SERVICES")
+      //console.log("REQUEST TO XBOX XSTS TOKEN")
 
-      const BASE_URL = "https://user.auth.xboxlive.com/user/authenticate";
+      const XSTS_BASE_URL = "https://xsts.auth.xboxlive.com/xsts/authorize";
       try {
         if (!foundToken) {
-          const response = await axios.post(
-            BASE_URL, {
+          xsts_response = await axios.post(
+            XSTS_BASE_URL, {
               Properties: {
-                AuthMethod: 'RPS',
-                SiteName: 'user.auth.xboxlive.com',
-                RpsTicket: `d=${access_token}`
+                SandboxId: "RETAIL",
+                UserTokens: [xbox_live_token]
               },
-              RelyingParty: 'http://auth.xboxlive.com',
-              TokenType: 'JWT'
+              RelyingParty: "rp://api.minecraftservices.com/",
+              TokenType: "JWT"
             },
             {
               headers: STANDARD_HEADERS,
-              responseType: 'json'
+              responseType: "json"
             }
           );
-          //console.log("RESPONSE 1", response.data)
+          //console.log("XSTS RESPONSE", xsts_response.data)
+          //console.log("xui", xsts_response.data.DisplayClaims.xui[0])
 
-          xbox_live_token = response.data.Token;
+          xsts_token = xsts_response.data.Token;
 
         }
 
-        /*##########################
-           Request to XSTS Services
-          ##########################*/
+        /*##############################
+            Request to MC Auth Services
+          ##############################*/
 
+        //console.log("REQUEST TO MC AUTH")
 
-        //console.log("REQUEST TO XBOX XSTS TOKEN")
-
-        const XSTS_BASE_URL = "https://xsts.auth.xboxlive.com/xsts/authorize";
+        const MC_AUTH_BASE_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
         try {
-          if(!foundToken) {
-            xsts_response = await axios.post(
-              XSTS_BASE_URL, {
-                Properties: {
-                  SandboxId: 'RETAIL',
-                  UserTokens: [xbox_live_token]
-                },
-                RelyingParty: 'rp://api.minecraftservices.com/',
-                TokenType: 'JWT'
+          if (!foundToken) {
+            const mc_auth_response = await axios.post(
+              MC_AUTH_BASE_URL, {
+                identityToken: `XBL3.0 x=${xsts_response.data.DisplayClaims.xui[0].uhs};${xsts_token}`
               },
               {
                 headers: STANDARD_HEADERS,
-                responseType: 'json'
+                responseType: "json"
               }
             );
-            //console.log("XSTS RESPONSE", xsts_response.data)
-            //console.log("xui", xsts_response.data.DisplayClaims.xui[0])
+            //console.log("MC AUTH RESPONSE", mc_auth_response.data)
 
-            xsts_token = xsts_response.data.Token
-
+            const expires_in = mc_auth_response.data.expires_in;
+            mc_access_token = mc_auth_response.data.access_token;
+            await this.signatureTokensModel.deleteMany({
+              user: user._id,
+              type: "minecraft_access_token"
+            });
+            await this.signatureTokensModel.create({
+              type: "minecraft_access_token",
+              token: mc_access_token,
+              issuedAt: new Date().getTime(),
+              expiresAt: new Date().getTime() + expires_in,
+              user: user
+            });
           }
 
-          /*##############################
-              Request to MC Auth Services
-            ##############################*/
 
-          //console.log("REQUEST TO MC AUTH")
-
-          const MC_AUTH_BASE_URL = "https://api.minecraftservices.com/authentication/login_with_xbox";
-          try {
-            if(!foundToken) {
-              const mc_auth_response = await axios.post(
-                MC_AUTH_BASE_URL, {
-                  identityToken: `XBL3.0 x=${xsts_response.data.DisplayClaims.xui[0].uhs};${xsts_token}`
-                },
-                {
-                  headers: STANDARD_HEADERS,
-                  responseType: 'json'
-                }
-              );
-              //console.log("MC AUTH RESPONSE", mc_auth_response.data)
-
-              const expires_in = mc_auth_response.data.expires_in
-              mc_access_token = mc_auth_response.data.access_token;
-              await this.signatureTokensModel.deleteMany({
-                user: user._id,
-                type: "minecraft_access_token"
-              });
-              await this.signatureTokensModel.create({
-                type: "minecraft_access_token",
-                token: mc_access_token,
-                issuedAt: new Date().getTime(),
-                expiresAt: new Date().getTime() + expires_in,
-                user: user
-              });
-            }
-
-
-
-            if (foundToken){
-              mc_access_token = foundToken.token;
-              //console.log("TOKEN RECUPERE")
-            }
+          if (foundToken) {
+            mc_access_token = foundToken.token;
+            //console.log("TOKEN RECUPERE")
+          }
 
           /*##############################
               Request to MC to check game ownership
@@ -601,13 +659,13 @@ export class UsersService {
 
             // If mc_check_response.data.items is empty the user don't have Minecraft, if not, he own.
 
-            if(mc_check_response.data.items.toString() === ""){
+            if (mc_check_response.data.items.toString() === "") {
               //console.log("Dont have Minecraft")
-              return JSON.parse('{"hasMinecraft": false}');
+              return JSON.parse("{\"hasMinecraft\": false}");
             } else {
               //console.log("Have Minecraft")
 
-              const MC_GET_PROFILE_BASE_URL = "https://api.minecraftservices.com/minecraft/profile"
+              const MC_GET_PROFILE_BASE_URL = "https://api.minecraftservices.com/minecraft/profile";
               const mc_get_profile_response = await axios.get(
                 MC_GET_PROFILE_BASE_URL, {
                   headers: {
@@ -622,7 +680,7 @@ export class UsersService {
               await this.mcProfileModel.deleteMany({
                 user: user._id
               });
-              if(activeSkin){
+              if (activeSkin) {
                 await this.mcProfileModel.create({
                   name: mc_data_profile.name,
                   uuid: mc_data_profile.id,
@@ -640,29 +698,29 @@ export class UsersService {
 
               return {
                 hasMinecraft: true,
-                profile: mc_data_profile,
+                profile: mc_data_profile
               };
             }
 
 
           } catch (error: any) {
-            console.log(error.message)
-            console.log(error)
+            console.log(error.message);
+            console.log(error);
           }
 
 
         } catch (error: any) {
-          console.log(error.message)
-          console.log(error)
+          console.log(error.message);
+          console.log(error);
         }
 
 
       } catch (error: any) {
-        console.log(error)
+        console.log(error);
       }
 
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
     }
 
   }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateUserTokenDto {
   @IsNotEmpty()
@@ -17,11 +17,11 @@ export class CreateUserTokenDto {
   @IsString()
   userId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   firstName: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   lastName: string;
 }

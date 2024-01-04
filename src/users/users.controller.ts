@@ -20,7 +20,13 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Get('profile')
   getUserPrivateProfile(@User() user: UserEntity) {
-    return this.usersService.getUserPrivateProfile(user);
+    return this.usersService.getUserPrivateProfile(user._id);
+  }
+
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
+  @Get('user/:id')
+  getUserPrivateProfileById(@Param('id') id: string) {
+    return this.usersService.getUserPrivateProfile(id);
   }
 
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
@@ -33,6 +39,16 @@ export class UsersController {
   @Put()
   update(@User() user: UserEntity, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(user, updateUserDto);
+  }
+
+  @Get('send-password-reset/:email')
+  sendPasswordReset(@Param('email') email: string) {
+    return this.usersService.sendPasswordReset(email);
+  }
+
+  @Post('reset-password/:token')
+  resetPassword(@Param('token') token: string, @Body() body: { password: string }) {
+    return this.usersService.resetPassword(token, body);
   }
 
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)

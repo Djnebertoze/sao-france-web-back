@@ -33,11 +33,13 @@ export class TransactionsService {
 
       await this.shopService.collectProduct(createTransactionDto.shopProductId, createTransactionDto.author)
 
+      const product_price_str = `${createTransactionDto.cost}${createTransactionDto.isRealMoney ? '€': ' PB'}`
+
       await this.mailSenderService.sendMail({
         receiverEmail: createTransactionDto.author.email,
-        subject: `Merci pour votre achat ${createTransactionDto.productName} x1 !`,
+        subject: `Merci pour votre achat '${createTransactionDto.productName}' x1 !`,
         mailType: MailType.PRODUCT_BUY
-      }, {product_name: createTransactionDto.productName, product_price:createTransactionDto.cost, isRealMoney:createTransactionDto.isRealMoney ? true : false})
+      }, {product_name: createTransactionDto.productName, product_price:product_price_str})
 
       return {
         statusCode: HttpStatus.CREATED,
