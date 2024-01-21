@@ -213,7 +213,8 @@ export class UsersService {
         "username",
         "birthday",
         "shopPoints",
-        "bio"
+        "bio",
+        'acceptEmails'
       ]);
 
       const mcProfile = await this.mcProfileModel.findOne({ user: userId }, [
@@ -224,17 +225,15 @@ export class UsersService {
       ]);
 
       return {
+        status: HttpStatus.OK,
         user: userProfile,
         mcProfile: mcProfile
       };
     } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: "Bad Request"
-        },
-        HttpStatus.BAD_REQUEST
-      );
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Erreur interne. Veuillez réessayer ultérieurement.'
+      }
     }
   }
 
@@ -363,7 +362,10 @@ export class UsersService {
     try {
 
       if (user.roles.join(",").includes(roleId)) {
-        return false;
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Rôle déjà possédé.'
+        };
       }
 
       await this.userModel.updateOne(
@@ -371,23 +373,36 @@ export class UsersService {
         { roles: [...user.roles, roleId] },
         { returnOriginal: false }
       );
-      return true;
+      return {
+        status: HttpStatus.OK,
+        message: 'Success.'
+      };
     } catch (error) {
-      return false;
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Erreur interne. Veuillez réessayer ultérieurement.'
+      };
     }
   }
 
   async removeRole(user: UserEntity, roleId: string) {
     try {
-      return await this.userModel.updateOne(
+      await this.userModel.updateOne(
         { _id: user._id },
         { roles: user.roles.filter(role => role !== roleId) },
         { returnOriginal: false }
       );
-    } catch (error) {
+      console.log('remove role to ', user.username, ' : ', roleId)
       return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: "Bad request"
+        status: HttpStatus.OK,
+        message: 'Success.'
+      };
+    } catch (error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Erreur interne. Veuillez réessayer ultérieurement.'
       };
     }
   }
