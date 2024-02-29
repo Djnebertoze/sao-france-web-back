@@ -11,4 +11,5 @@ export class ShopProductDto {
     pointsToGive?: number
     // Only if categorieId == grades
     roleToGive?: string
+    cosmeticToGive?: string
 }

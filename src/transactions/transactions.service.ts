@@ -28,7 +28,9 @@ export class TransactionsService {
         shopProductId: createTransactionDto.shopProductId,
         mode: createTransactionDto.mode ?? null,
         session_id: createTransactionDto.session_id ?? null,
-        stripeProductId: createTransactionDto.stripeProductId ?? null
+        stripeProductId: createTransactionDto.stripeProductId ?? null,
+        shopProduct: createTransactionDto.shopProduct ?? null,
+        mcProfile: createTransactionDto.mcProfile ?? null
       });
 
       await this.shopService.collectProduct(createTransactionDto.shopProductId, createTransactionDto.author)
@@ -62,6 +64,35 @@ export class TransactionsService {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: error.errors
         }
+    }
+  }
+
+  async getConfirmedTransactions(){
+    try {
+      return await this.transactionModel.find({ status: "confirmed" })
+        .select('status productName shopProductId shopProduct._id mcProfile.name mcProfile.uuid shopProduct.name shopProduct.categorieId shopProduct.roleToGive shopProduct.pointsToGive shopProduct.cosmeticToGive')
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
+    }
+  }
+
+  async changeStatusToClaimed(transactionId: string){
+    try {
+      await this.transactionModel.findOneAndUpdate({ _id: transactionId }, { status: 'claimed' })
+      return {
+        statusCode: HttpStatus.ACCEPTED,
+        message: 'Status modifié avec succès'
+      }
+    } catch (error) {
+      console.log(error)
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
+
     }
   }
 }

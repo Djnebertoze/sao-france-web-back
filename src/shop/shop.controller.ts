@@ -36,7 +36,6 @@ export class ShopController {
     return this.shopService.getProducts();
   }
 
-  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
   @Get('product/:id')
   getProduct(@Param('id') id: string){
     return this.shopService.getProduct(id);
@@ -48,5 +47,14 @@ export class ShopController {
     return this.shopService.payProductWithShopPoints(productId, user);
   }
 
+  @Get('inGameClaims')
+  getInGameClaims(){
+    return this.shopService.getInGameClaims()
+  }
+
+  @Get('claimInGame/:id')
+  claimInGame(@Param('id') transactionId:string){
+    return this.shopService.claimInGame(transactionId);
+  }
 
 }

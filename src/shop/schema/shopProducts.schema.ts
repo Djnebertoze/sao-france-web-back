@@ -37,6 +37,9 @@ export class ShopProduct {
 
   @Prop({ required: false })
   roleToGive: string
+
+  @Prop({ required: false })
+  cosmeticToGive: string
 }
 
 export const ShopProductSchema = SchemaFactory.createForClass(ShopProduct);

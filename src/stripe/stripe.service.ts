@@ -6,6 +6,9 @@ import { UserEntity } from "../users/entities/user.entity";
 import * as process from "process";
 import { TransactionsService } from "../transactions/transactions.service";
 import { ShopService } from "../shop/shop.service";
+import { InjectModel } from "@nestjs/mongoose";
+import { McProfile, McProfileDocument } from "../users/schema/mcProfiles.schema";
+import { Model } from "mongoose";
 
 
 @Injectable()
@@ -13,6 +16,7 @@ export class StripeService {
   private stripe: Stripe;
 
   constructor(
+    @InjectModel(McProfile.name, "app-db") private mcProfileModel: Model<McProfileDocument>,
     private usersService: UsersService,
     private transactionService: TransactionsService,
     private shopService: ShopService
@@ -59,6 +63,7 @@ export class StripeService {
 
   async updateStripePaymentStatusToSuccess(user: UserEntity, productId: string, body: { status: string, session_id: string}) {
     if ((user._id.toString().split('').reverse().join('') + productId.split('').reverse().join('')) == body.status){
+      const mcProfile = await this.mcProfileModel.findOne({ user: user })
       const session = await this.stripe.checkout.sessions.retrieve(body.session_id);
       if(!session){
         return {
@@ -73,8 +78,8 @@ export class StripeService {
         }
       }
 
-      const productStripeId = await this.shopService.getProduct(productId).then((product) => product.product.stripeLink)
-      const product = await this.stripe.products.retrieve(productStripeId)
+      const shopProduct = await this.shopService.getProduct(productId).then((product) => product.product)
+      const product = await this.stripe.products.retrieve(shopProduct.stripeLink)
 
       if (product) {
         await this.transactionService.createTransaction({
@@ -86,7 +91,9 @@ export class StripeService {
           mode: session.mode,
           session_id: session.id,
           shopProductId: productId,
-          stripeProductId: productStripeId
+          stripeProductId: shopProduct.stripeLink,
+          shopProduct: shopProduct,
+          mcProfile: mcProfile
         });
         //await this.stripe.checkout.sessions.expire(session.id);
         return {

@@ -5,6 +5,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ShopProduct, ShopProductSchema } from "./schema/shopProducts.schema";
 import { UsersModule } from "../users/users.module";
 import { TransactionsModule } from "../transactions/transactions.module";
+import { McProfile, McProfileSchema } from "../users/schema/mcProfiles.schema";
 
 @Module({
   imports: [
@@ -16,6 +17,12 @@ import { TransactionsModule } from "../transactions/transactions.module";
           name: ShopProduct.name,
           useFactory: () => {
             return ShopProductSchema;
+          },
+        },
+        {
+          name: McProfile.name,
+          useFactory: () => {
+            return McProfileSchema;
           },
         }
       ],

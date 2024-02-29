@@ -22,7 +22,6 @@ export class McProfile {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    autopopulate: { select: '_id firstName username createdAt'},
   })
   user: User;
 }

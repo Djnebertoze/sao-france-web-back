@@ -1,5 +1,7 @@
 import { User } from "../../users/schema/users.schema";
 import { UserEntity } from "../../users/entities/user.entity";
+import { ShopProduct } from "../../shop/schema/shopProducts.schema";
+import { McProfile } from "../../users/schema/mcProfiles.schema";
 
 
 export interface CreateTransactionDto {
@@ -12,4 +14,6 @@ export interface CreateTransactionDto {
   session_id?: string;
   shopProductId: string;
   stripeProductId?: string;
+  shopProduct?: ShopProduct
+  mcProfile?: McProfile
 }

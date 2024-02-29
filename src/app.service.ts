@@ -36,7 +36,8 @@ export class AppService {
             stripeLink: shopProduct.stripeLink,
             descriptionDetails: shopProduct.descriptionDetails,
             pointsToGive: shopProduct.pointsToGive,
-            roleToGive: shopProduct.roleToGive
+            roleToGive: shopProduct.roleToGive,
+            cosmeticToGive: shopProduct.cosmeticToGive
           })
         }
       }

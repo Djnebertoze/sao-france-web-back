@@ -6,6 +6,7 @@ import { Model } from "mongoose";
 import { ShopProduct, ShopProductDocument } from "./schema/shopProducts.schema";
 import { UsersService } from "../users/users.service";
 import { TransactionsService } from "../transactions/transactions.service";
+import { McProfile, McProfileDocument } from "../users/schema/mcProfiles.schema";
 
 @Injectable()
 export class ShopService {
@@ -13,6 +14,7 @@ export class ShopService {
 
   constructor(
     @InjectModel(ShopProduct.name, 'app-db') private shopProductModel: Model<ShopProductDocument>,
+    @InjectModel(McProfile.name, "app-db") private mcProfileModel: Model<McProfileDocument>,
     private usersServices: UsersService,
     @Inject(forwardRef(() => TransactionsService))
     private transactionsService: TransactionsService
@@ -33,6 +35,7 @@ export class ShopService {
       const descriptionDetails:string = createShopProductDto.descriptionDetails
       const pointsToGive:number = createShopProductDto.pointsToGive
       const roleToGive:string = createShopProductDto.roleToGive
+      const cosmeticToGive:string = createShopProductDto.cosmeticToGive
 
       await this.shopProductModel.create({
         place: place,
@@ -45,7 +48,8 @@ export class ShopService {
         stripeLink: stripeLink,
         descriptionDetails: descriptionDetails,
         pointsToGive: pointsToGive,
-        roleToGive: roleToGive
+        roleToGive: roleToGive,
+        cosmeticToGive: cosmeticToGive
       })
       return { success: true };
 
@@ -120,10 +124,18 @@ export class ShopService {
 
   async payProductWithShopPoints(productId: string, user:UserEntity) {
     const product = await this.getProduct(productId).then((product) => product.product);
+    const mcProfile = await this.mcProfileModel.findOne({ user: user })
     if(!product){
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Produit introuvable.'
+      }
+    }
+
+    if(!mcProfile){
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Compte Minecraft non connecté.'
       }
     }
 
@@ -150,7 +162,9 @@ export class ShopService {
           isRealMoney: false,
           status: 'confirmed',
           cost: product.price,
-          productName: product.name
+          productName: product.name,
+          shopProduct: product,
+          mcProfile: mcProfile
         })
         return {
           status: HttpStatus.CREATED
@@ -171,5 +185,23 @@ export class ShopService {
       }
     }
 
+  }
+
+  async getInGameClaims(){
+    const transactions = await this.transactionsService.getConfirmedTransactions();
+    return transactions;
+  }
+
+  async claimInGame(transactionId: string) {
+    try {
+      await this.transactionsService.changeStatusToClaimed(transactionId)
+    } catch (e){
+      console.log(e)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: e,
+        message: 'Erreur interne lors de la récupération.'
+      }
+    }
   }
 }
