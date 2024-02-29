@@ -79,6 +79,8 @@ export class TransactionsService {
     }
   }
 
+
+
   async changeStatusToClaimed(transactionId: string){
     try {
       await this.transactionModel.findOneAndUpdate({ _id: transactionId }, { status: 'claimed' })
@@ -93,6 +95,35 @@ export class TransactionsService {
         message: error.errors
       }
 
+    }
+  }
+
+  // TEMP
+  async getConfirmedTransactions2(){
+    try {
+      return await this.transactionModel.find({ status: "claimed" })
+        .select('status productName shopProductId shopProduct._id mcProfile.name mcProfile.uuid shopProduct.name shopProduct.categorieId shopProduct.roleToGive shopProduct.pointsToGive shopProduct.cosmeticToGive')
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
+    }
+  }
+
+  async changeStatusToClaimed2(transactionId: string){
+    try {
+      await this.transactionModel.findOneAndUpdate({ _id: transactionId }, { status: 'claimed2' })
+      return {
+        statusCode: HttpStatus.ACCEPTED,
+        message: 'Status modifié avec succès'
+      }
+    } catch (error) {
+      console.log(error)
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
     }
   }
 }

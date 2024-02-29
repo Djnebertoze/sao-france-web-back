@@ -204,4 +204,24 @@ export class ShopService {
       }
     }
   }
+
+  // TEMP
+  async getInGameClaims2(){
+    const transactions = await this.transactionsService.getConfirmedTransactions2();
+    return transactions;
+  }
+
+  // TEMP for multi server
+  async claimInGame2(transactionId: string) {
+    try {
+      await this.transactionsService.changeStatusToClaimed2(transactionId)
+    } catch (e){
+      console.log(e)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: e,
+        message: 'Erreur interne lors de la récupération.'
+      }
+    }
+  }
 }

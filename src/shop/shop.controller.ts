@@ -57,4 +57,17 @@ export class ShopController {
     return this.shopService.claimInGame(transactionId);
   }
 
+
+  // TEMP
+  @Get('inGameClaims2')
+  getInGameClaims2(){
+    return this.shopService.getInGameClaims2()
+  }
+
+
+  // TEMP
+  @Get('claimInGame2/:id')
+  claim2InGame(@Param('id') transactionId:string){
+    return this.shopService.claimInGame2(transactionId);
+  }
 }
