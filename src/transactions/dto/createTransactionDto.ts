@@ -10,10 +10,11 @@ export interface CreateTransactionDto {
   cost: number;
   status: string;
   productName: string;
-  mode?: string;
-  session_id?: string;
+  createdBy?: User | UserEntity;
+  mode?: string | undefined;
+  session_id?: string | undefined;
   shopProductId: string;
-  stripeProductId?: string;
+  stripeProductId?: string | undefined;
   shopProduct?: ShopProduct
-  mcProfile?: McProfile
+  mcProfile?: McProfile | undefined
 }

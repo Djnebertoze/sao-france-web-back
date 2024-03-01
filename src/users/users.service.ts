@@ -330,9 +330,9 @@ export class UsersService {
   async addShopPoints(user: UserEntity, shopPoints: number) {
     try {
 
-      return await this.userModel.updateOne(
+      return this.userModel.updateOne(
         { _id: user._id },
-        { shopPoints: user.shopPoints + shopPoints },
+        { shopPoints: Number(user.shopPoints) + Number(shopPoints) },
         { returnOriginal: false }
       );
     } catch (error) {
@@ -345,10 +345,11 @@ export class UsersService {
   }
 
   async removeShopPoints(user: UserEntity, shopPoints: number) {
+    console.log('removing ' + shopPoints + "sp")
     try {
       await this.userModel.updateOne(
         { _id: user._id },
-        { shopPoints: user.shopPoints - shopPoints },
+        { shopPoints: Number(user.shopPoints) - Number(shopPoints) },
         { returnOriginal: false }
       );
       return true;
@@ -455,6 +456,24 @@ export class UsersService {
     try {
       return this.userModel
         .findOne({ email: email })
+        .select(
+          "_id username firstName lastName email phoneNumber profilePicture createdAt roles birthday shopPoints bio"
+        );
+    } catch (error) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: "Bad Request"
+        },
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  async getUserById(id: string) {
+    try {
+      return this.userModel
+        .findOne({ _id: id })
         .select(
           "_id username firstName lastName email phoneNumber profilePicture createdAt roles birthday shopPoints bio"
         );

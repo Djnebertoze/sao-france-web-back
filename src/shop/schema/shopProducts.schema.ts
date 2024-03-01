@@ -20,26 +20,26 @@ export class ShopProduct {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ required: false })
+  @Prop({ required: true, default: false })
   isRealMoney: boolean;
 
   @Prop({ required: true })
   categorieId: string;
 
-  @Prop({ required: true })
-  place: number;
+  @Prop({ required: false })
+  place: number | undefined;
 
   @Prop({ required: false })
-  stripeLink: string
+  stripeLink: string | undefined;
 
   @Prop({ required: false })
-  pointsToGive: number
+  pointsToGive: number | undefined;
 
   @Prop({ required: false })
-  roleToGive: string
+  roleToGive: string | undefined;
 
   @Prop({ required: false })
-  cosmeticToGive: string
+  cosmeticToGive: string | undefined;
 }
 
 export const ShopProductSchema = SchemaFactory.createForClass(ShopProduct);

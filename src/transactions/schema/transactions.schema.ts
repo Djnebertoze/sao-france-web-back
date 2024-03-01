@@ -35,6 +35,14 @@ export class Transaction {
   @Prop({ required: true })
   shopProductId: string
 
+  @Prop({
+    required: false,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    autopopulate: { select: 'username' }
+  })
+  createdBy: User;
+
   // ONLY IF STRIPE PAYMENT
   @Prop({ required: false })
   mode: string

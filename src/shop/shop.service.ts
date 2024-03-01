@@ -104,8 +104,7 @@ export class ShopService {
     }
   }
 
-  async collectProduct(productId: string, user:UserEntity) {
-    const product = await this.getProduct(productId).then((product) => product.product);
+  async collectProduct(product: ShopProduct, user:UserEntity) {
 
     if (product.categorieId == 'grades'){
 
@@ -223,5 +222,73 @@ export class ShopService {
         message: 'Erreur interne lors de la récupération.'
       }
     }
+  }
+
+  async addShopPoints(user: UserEntity, toGiveUserId: string, numberOfPoints: number){
+
+    const author: UserEntity = await this.usersServices.getUserById(toGiveUserId)
+
+    const productName = numberOfPoints + " points boutiques"
+
+    return this.transactionsService.createTransaction({
+      author: author,
+      shopProduct: {
+        name: productName,
+        description: 'admin points',
+        descriptionDetails: 'admin points',
+        imageUrl: 'https://www.saofrance.net/_next/static/media/MainLogo.83e8c21b.png',
+        categorieId: 'points',
+        price: 0,
+        isRealMoney: false,
+        pointsToGive: numberOfPoints,
+        roleToGive: null,
+        cosmeticToGive: null,
+        stripeLink: null,
+        place: null
+      },
+      mcProfile: null,
+      cost: 0,
+      isRealMoney: false,
+      createdBy: user,
+      shopProductId: numberOfPoints+'_admin_points',
+      status: 'confirmed',
+      productName: productName
+    })
+  }
+
+  async removeShopPoints(user: UserEntity, toGiveUserId: string, numberOfPoints: number){
+    const author: UserEntity = await this.usersServices.getUserById(toGiveUserId)
+
+    const productName = "-" + numberOfPoints + " points boutiques"
+
+    try {
+        return this.transactionsService.createTransaction({
+          author: author,
+          shopProduct: {
+            name: productName,
+            description: 'admin points',
+            descriptionDetails: 'admin points',
+            imageUrl: 'https://www.saofrance.net/_next/static/media/MainLogo.83e8c21b.png',
+            categorieId: 'points',
+            price: 0,
+            isRealMoney: false,
+            pointsToGive: -numberOfPoints,
+            roleToGive: null,
+            cosmeticToGive: null,
+            stripeLink: null,
+            place: null
+          },
+          mcProfile: null,
+          cost: 0,
+          isRealMoney: false,
+          createdBy: user,
+          shopProductId: '-'+numberOfPoints+'_admin_points',
+          status: 'confirmed',
+          productName: productName
+        }, true);
+    } catch (e){
+      console.log(e)
+    }
+
   }
 }

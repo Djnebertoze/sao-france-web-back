@@ -6,6 +6,9 @@ import { User } from "../auth/decorators/users.decorator";
 import { UserEntity } from "../users/entities/user.entity";
 import { ShopProductDto } from "./dto/shopProductDto";
 import { TransactionsService } from "../transactions/transactions.service";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { Role } from "../auth/roles/roles.enum";
+import { RolesGuard } from "../auth/guards/roles.guard";
 
 @Controller('shop')
 export class ShopController {
@@ -45,6 +48,20 @@ export class ShopController {
   @Post('pay/:id')
   payProduct(@User() user: UserEntity, @Param('id') productId:string){
     return this.shopService.payProductWithShopPoints(productId, user);
+  }
+
+  @Roles(Role.ADMIN, Role.RESPONSABLE)
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard, RolesGuard)
+  @Post('addShopPoints/:userId')
+  giveShopPoints(@User() user: UserEntity, @Param('userId') toGiveUserId:string, @Body() numberOfPoint: { points:number }){
+    return this.shopService.addShopPoints(user, toGiveUserId, numberOfPoint.points);
+  }
+
+  @Roles(Role.ADMIN, Role.RESPONSABLE)
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard, RolesGuard)
+  @Post('removeShopPoints/:userId')
+  removeShopPoints(@User() user: UserEntity, @Param('userId') toRemoveUserId:string, @Body() numberOfPoint: { points:number }){
+    return this.shopService.removeShopPoints(user, toRemoveUserId, numberOfPoint.points);
   }
 
   @Get('inGameClaims')

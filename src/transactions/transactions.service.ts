@@ -7,6 +7,7 @@ import { CreateTransactionDto } from "./dto/createTransactionDto";
 import { ShopService } from "../shop/shop.service";
 import { MailSenderService } from "../mail-sender/mail-sender.service";
 import { MailType } from "../mail-sender/mails/mailTypes.enum";
+import { UserEntity } from "../users/entities/user.entity";
 
 @Injectable()
 export class TransactionsService {
@@ -17,7 +18,7 @@ export class TransactionsService {
     private mailSenderService: MailSenderService,
   ) {}
 
-  async createTransaction(createTransactionDto: CreateTransactionDto) {
+  async createTransaction(createTransactionDto: CreateTransactionDto, disableMails?:boolean) {
     try {
       await this.transactionModel.create({
         author: createTransactionDto.author,
@@ -30,18 +31,22 @@ export class TransactionsService {
         session_id: createTransactionDto.session_id ?? null,
         stripeProductId: createTransactionDto.stripeProductId ?? null,
         shopProduct: createTransactionDto.shopProduct ?? null,
-        mcProfile: createTransactionDto.mcProfile ?? null
+        mcProfile: createTransactionDto.mcProfile ?? null,
+        createdBy: createTransactionDto.createdBy
       });
 
-      await this.shopService.collectProduct(createTransactionDto.shopProductId, createTransactionDto.author)
+      await this.shopService.collectProduct(createTransactionDto.shopProduct, createTransactionDto.author)
 
       const product_price_str = `${createTransactionDto.cost}${createTransactionDto.isRealMoney ? '€': ' PB'}`
 
-      await this.mailSenderService.sendMail({
-        receiverEmail: createTransactionDto.author.email,
-        subject: `Merci pour votre achat '${createTransactionDto.productName}' x1 !`,
-        mailType: MailType.PRODUCT_BUY
-      }, {product_name: createTransactionDto.productName, product_price:product_price_str})
+      if(!disableMails){
+        await this.mailSenderService.sendMail({
+          receiverEmail: createTransactionDto.author.email,
+          subject: `Merci pour votre achat '${createTransactionDto.productName}' x1 !`,
+          mailType: MailType.PRODUCT_BUY
+        }, {product_name: createTransactionDto.productName, product_price:product_price_str})
+      }
+
 
       return {
         statusCode: HttpStatus.CREATED,
@@ -79,8 +84,6 @@ export class TransactionsService {
     }
   }
 
-
-
   async changeStatusToClaimed(transactionId: string){
     try {
       await this.transactionModel.findOneAndUpdate({ _id: transactionId }, { status: 'claimed' })
@@ -103,6 +106,17 @@ export class TransactionsService {
     try {
       return await this.transactionModel.find({ status: "claimed" })
         .select('status productName shopProductId shopProduct._id mcProfile.name mcProfile.uuid shopProduct.name shopProduct.categorieId shopProduct.roleToGive shopProduct.pointsToGive shopProduct.cosmeticToGive')
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
+    }
+  }
+
+  async getTransactionsOf(user:UserEntity){
+    try {
+      return await this.transactionModel.find({ author: user });
     } catch (error) {
       return {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
