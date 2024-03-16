@@ -251,7 +251,7 @@ export class ShopService {
       isRealMoney: false,
       createdBy: user,
       shopProductId: numberOfPoints+'_admin_points',
-      status: 'claimed',
+      status: 'claimed2',
       productName: productName
     })
   }
@@ -283,7 +283,7 @@ export class ShopService {
           isRealMoney: false,
           createdBy: user,
           shopProductId: '-'+numberOfPoints+'_admin_points',
-          status: 'claimed',
+          status: 'claimed2',
           productName: productName
         }, true);
     } catch (e){
