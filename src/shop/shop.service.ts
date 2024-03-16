@@ -253,7 +253,7 @@ export class ShopService {
       shopProductId: numberOfPoints+'_admin_points',
       status: 'claimed2',
       productName: productName
-    })
+    }, true)
   }
 
   async removeShopPoints(user: UserEntity, toGiveUserId: string, numberOfPoints: number){
