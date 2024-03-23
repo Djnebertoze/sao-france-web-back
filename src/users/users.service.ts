@@ -548,8 +548,26 @@ export class UsersService {
     }
   }
 
+  async getAdminStats(){
+    // Get 30d registers stats
+    const data = {}
+    const today = new Date()
+    for (let i = 60; i >= 0; i--) {
+      const priorDate = new Date(new Date().setDate(today.getDate() - i));
+      const startOfDay = new Date(priorDate.getFullYear(), priorDate.getMonth(), priorDate.getDate(), 0, 0, 0);
+      const endOfDay = new Date(priorDate.getFullYear(), priorDate.getMonth(), priorDate.getDate(), 23, 59, 59);
+
+      data[''+priorDate.getDate() + '/' + (priorDate.getMonth() + 1)] = await this.userModel.count({
+        createdAt: {
+          $gte: startOfDay,
+          $lte: endOfDay
+        }
+      })
+    }
+    return {'registers': { data: data }};
+  }
+
   async requestXboxServices(user: UserEntity, request: Request) {
-    //console.log("request")
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore

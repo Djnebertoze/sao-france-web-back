@@ -8,8 +8,9 @@ export class ShopProductDto {
     stripeLink?: string;
     descriptionDetails?: string;
     // Only if categorieId == points
-    pointsToGive?: number
+    pointsToGive?: number;
     // Only if categorieId == grades
-    roleToGive?: string
-    cosmeticToGive?: string
+    roleToGive?: string;
+    cosmeticToGive?: string;
+    bonusShopPoints?: number;
 }

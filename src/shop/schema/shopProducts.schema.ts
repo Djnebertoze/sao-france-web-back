@@ -36,6 +36,9 @@ export class ShopProduct {
   pointsToGive: number | undefined;
 
   @Prop({ required: false })
+  bonusShopPoints: number | undefined;
+
+  @Prop({ required: false })
   roleToGive: string | undefined;
 
   @Prop({ required: false })

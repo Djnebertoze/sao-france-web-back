@@ -21,7 +21,6 @@ export class ShopService {
   ) {}
 
   async createShopProduct(user: UserEntity, createShopProductDto: ShopProductDto){
-    console.log(createShopProductDto)
     try {
 
       const place = await this.shopProductModel.countDocuments({categorieId: createShopProductDto.categorieId});
@@ -36,6 +35,7 @@ export class ShopService {
       const pointsToGive:number = createShopProductDto.pointsToGive
       const roleToGive:string = createShopProductDto.roleToGive
       const cosmeticToGive:string = createShopProductDto.cosmeticToGive
+      const bonusShopPoints:number = createShopProductDto.bonusShopPoints
 
       await this.shopProductModel.create({
         place: place,
@@ -49,7 +49,8 @@ export class ShopService {
         descriptionDetails: descriptionDetails,
         pointsToGive: pointsToGive,
         roleToGive: roleToGive,
-        cosmeticToGive: cosmeticToGive
+        cosmeticToGive: cosmeticToGive,
+        bonusShopPoints: bonusShopPoints
       })
       return { success: true };
 
@@ -116,6 +117,10 @@ export class ShopService {
 
     } else if (product.categorieId == 'cosmetiques') {
       // TODO: Give cosmetics
+    }
+
+    if (product.bonusShopPoints){
+      await this.usersServices.addShopPoints(user, product.bonusShopPoints)
     }
     console.log('Gave ' + product.name + ' to ' + user.username)
     return true;
@@ -244,7 +249,8 @@ export class ShopService {
         roleToGive: null,
         cosmeticToGive: null,
         stripeLink: null,
-        place: null
+        place: null,
+        bonusShopPoints: null
       },
       mcProfile: null,
       cost: 0,
@@ -276,7 +282,8 @@ export class ShopService {
             roleToGive: null,
             cosmeticToGive: null,
             stripeLink: null,
-            place: null
+            place: null,
+            bonusShopPoints: null
           },
           mcProfile: null,
           cost: 0,
