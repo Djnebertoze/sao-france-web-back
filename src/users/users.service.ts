@@ -549,22 +549,27 @@ export class UsersService {
   }
 
   async getAdminStats(){
-    // Get 30d registers stats
-    const data = {}
+    // Get 60d registers stats
+    const registers60dData = {}
     const today = new Date()
     for (let i = 60; i >= 0; i--) {
       const priorDate = new Date(new Date().setDate(today.getDate() - i));
       const startOfDay = new Date(priorDate.getFullYear(), priorDate.getMonth(), priorDate.getDate(), 0, 0, 0);
       const endOfDay = new Date(priorDate.getFullYear(), priorDate.getMonth(), priorDate.getDate(), 23, 59, 59);
 
-      data[''+priorDate.getDate() + '/' + (priorDate.getMonth() + 1)] = await this.userModel.count({
+      registers60dData[''+priorDate.getDate() + '/' + (priorDate.getMonth() + 1)] = await this.userModel.count({
         createdAt: {
           $gte: startOfDay,
           $lte: endOfDay
         }
       })
     }
-    return {'registers': { data: data }};
+
+    // Amount of users
+    const amountOfUsers = await this.userModel.count({});
+
+
+    return { registers: { data: registers60dData }, numbers: { users: amountOfUsers }};
   }
 
   async requestXboxServices(user: UserEntity, request: Request) {
