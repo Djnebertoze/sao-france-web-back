@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -16,6 +16,7 @@ import { JwtService } from "@nestjs/jwt";
 import { MailSenderService } from "../mail-sender/mail-sender.service";
 import { MailType } from "../mail-sender/mails/mailTypes.enum";
 import * as process from "process";
+import { TransactionsService } from "../transactions/transactions.service";
 
 
 @Injectable()
@@ -25,6 +26,7 @@ export class UsersService {
     @InjectModel(UserToken.name, "app-db") private userTokenModel: Model<UserTokenDocument>,
     @InjectModel(SignatureTokens.name, "app-db") private signatureTokensModel: Model<SignatureTokensDocument>,
     @InjectModel(McProfile.name, "app-db") private mcProfileModel: Model<McProfileDocument>,
+
     private jwtService: JwtService,
     private mailSenderService: MailSenderService
   ) {
@@ -546,30 +548,6 @@ export class UsersService {
         message: "Erreur interne. Veuillez réessayer ultérieurement."
       };
     }
-  }
-
-  async getAdminStats(){
-    // Get 60d registers stats
-    const registers60dData = {}
-    const today = new Date()
-    for (let i = 60; i >= 0; i--) {
-      const priorDate = new Date(new Date().setDate(today.getDate() - i));
-      const startOfDay = new Date(priorDate.getFullYear(), priorDate.getMonth(), priorDate.getDate(), 0, 0, 0);
-      const endOfDay = new Date(priorDate.getFullYear(), priorDate.getMonth(), priorDate.getDate(), 23, 59, 59);
-
-      registers60dData[''+priorDate.getDate() + '/' + (priorDate.getMonth() + 1)] = await this.userModel.count({
-        createdAt: {
-          $gte: startOfDay,
-          $lte: endOfDay
-        }
-      })
-    }
-
-    // Amount of users
-    const amountOfUsers = await this.userModel.count({});
-
-
-    return { registers: { data: registers60dData }, numbers: { users: amountOfUsers }};
   }
 
   async requestXboxServices(user: UserEntity, request: Request) {

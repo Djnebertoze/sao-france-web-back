@@ -1,9 +1,11 @@
-import { Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { UniqueJwtGuard } from "../auth/guards/unique-jwt.guard";
 import { User } from "../auth/decorators/users.decorator";
 import { UserEntity } from "../users/entities/user.entity";
 import { TransactionsService } from "./transactions.service";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { Role } from "../auth/roles/roles.enum";
 
 @Controller('transactions')
 export class TransactionsController {
@@ -16,4 +18,17 @@ export class TransactionsController {
     return this.transactionsService.getTransactionsOf(user);
   }
 
+  @Roles(Role.ADMIN, Role.RESPONSABLE)
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
+  @Get('all')
+  async getAllTransactions(){
+    return this.transactionsService.getAllTransactions()
+  }
+
+  @Roles(Role.ADMIN, Role.RESPONSABLE)
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
+  @Get(':id')
+  async getTransaction(@Param('id') transactionId: string){
+    return this.transactionsService.getTransaction(transactionId);
+  }
 }

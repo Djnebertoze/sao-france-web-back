@@ -125,6 +125,30 @@ export class TransactionsService {
     }
   }
 
+  async getAllTransactions(){
+    try {
+      return await this.transactionModel.find();
+    } catch (error) {
+      console.log(error)
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
+    }
+  }
+
+  async getTransaction(transactionId:string){
+    try {
+      return await this.transactionModel.find({_id: transactionId});
+    } catch (error) {
+      console.log(error)
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
+    }
+  }
+
   async changeStatusToClaimed2(transactionId: string){
     try {
       await this.transactionModel.findOneAndUpdate({ _id: transactionId }, { status: 'claimed2' })

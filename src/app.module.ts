@@ -11,6 +11,9 @@ import { StripeModule } from "./stripe/stripe.module";
 import { TransactionsModule } from "./transactions/transactions.module";
 import * as process from "process";
 import { MailSenderService } from "./mail-sender/mail-sender.service";
+import { StatisticsService } from './statistics/statistics.service';
+import { StatisticsController } from './statistics/statistics.controller';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -32,7 +35,8 @@ import { MailSenderService } from "./mail-sender/mail-sender.service";
     UsersModule,
     ShopModule,
     TransactionsModule,
-    StripeModule
+    StripeModule,
+    StatisticsModule
   ],
   controllers: [AppController],
   providers: [AppService, MailSenderService],

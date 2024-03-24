@@ -95,11 +95,4 @@ export class UsersController {
   requestXboxServices(@User() user: UserEntity, @Request() req){
     return this.usersService.requestXboxServices(user, req);
   }
-
-  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
-  @Roles(Role.ADMIN, Role.RESPONSABLE, Role.MODERATOR, Role.STAFF)
-  @Get('stats')
-  getAdminStats(){
-    return this.usersService.getAdminStats();
-  }
 }
