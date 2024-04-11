@@ -61,7 +61,8 @@ export class StatisticsService {
         },
         cost: {
           $gt: 0
-        }
+        },
+        isRealMoney: true
       })
     }
 

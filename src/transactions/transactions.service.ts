@@ -127,7 +127,71 @@ export class TransactionsService {
 
   async getAllTransactions(){
     try {
-      return await this.transactionModel.find();
+      return await this.transactionModel.find().sort({ createdAt: -1 });
+    } catch (error) {
+      console.log(error)
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error.errors
+      }
+    }
+  }
+
+  async getSizedListTransactions(pageNumber:number, pageSize:number, filters:string){
+    const filtersParsed : {
+      author : {
+        username?: string,
+        email?: string
+      },
+      isRealMoney?: boolean,
+      shopProduct : {
+        categorieId?: string
+      },
+      shopProductId?: string
+    } = JSON.parse(filters)
+
+    /*const query = {
+      $and: [
+        { ...(filtersParsed.author && filtersParsed.author.username && { 'author.username': new RegExp(filtersParsed.author.username, 'i') }) },
+        { ...(filtersParsed.author && filtersParsed.author.email && { 'author.email': new RegExp(filtersParsed.author.email, 'i') }) },
+        { ...(filtersParsed.isRealMoney && { isRealMoney: filtersParsed.isRealMoney }) },
+        { ...(filtersParsed.shopProduct && filtersParsed.shopProduct.categorieId && { 'shopProduct.categorieId': filtersParsed.shopProduct.categorieId }) },
+      ]
+    };*/
+
+    const query = {};
+
+    if (filtersParsed.author && filtersParsed.author.username) {
+      query['author.username'] = filtersParsed.author.username;
+    }
+
+    if (filtersParsed.author && filtersParsed.author.email) {
+      query['author.email'] = filtersParsed.author.email;
+    }
+
+    if (filtersParsed.isRealMoney !== undefined) {
+      query['isRealMoney'] = filtersParsed.isRealMoney;
+    }
+
+    if (filtersParsed.shopProduct && filtersParsed.shopProduct.categorieId) {
+      query['shopProduct.categorieId'] = filtersParsed.shopProduct.categorieId;
+    }
+
+    if (filtersParsed.shopProductId){
+      query['shopProductId'] = filtersParsed.shopProductId;
+    }
+
+    try {
+      const skip = (pageNumber) * pageSize; // Calculer le nombre d'éléments à sauter
+      const transactions = await this.transactionModel
+        .find(query)
+        .sort({ createdAt: -1 }) // Trier par ordre décroissant de la date de création
+        .skip(skip)
+        .limit(pageSize);
+
+      const countTransactions = await this.transactionModel.countDocuments(query)
+
+      return { list: transactions, total: countTransactions };
     } catch (error) {
       console.log(error)
       return {

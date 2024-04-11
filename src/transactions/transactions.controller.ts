@@ -24,6 +24,12 @@ export class TransactionsController {
   async getAllTransactions(){
     return this.transactionsService.getAllTransactions()
   }
+  @Roles(Role.ADMIN, Role.RESPONSABLE)
+  @UseGuards(JwtAuthGuard, UniqueJwtGuard)
+  @Get('some/:page/:size/:filters')
+  async getSizedListTransactions(@Param('page') pageNumber: number, @Param('size') pageSize: number, @Param('filters') filters: string){
+    return this.transactionsService.getSizedListTransactions(pageNumber, pageSize, filters)
+  }
 
   @Roles(Role.ADMIN, Role.RESPONSABLE)
   @UseGuards(JwtAuthGuard, UniqueJwtGuard)
