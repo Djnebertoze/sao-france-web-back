@@ -27,11 +27,11 @@ export class StripeService {
   }
 
   async getStripeProducts(){
-    return this.stripe.products.list();
+    return this.stripe.products.list({limit: 100});
   }
 
   async getActiveStripePrices(){
-    return this.stripe.prices.list({active: true, limit: 60});
+    return this.stripe.prices.list({active: true, limit: 100});
   }
 
   async getStripePriceById(id: string){
