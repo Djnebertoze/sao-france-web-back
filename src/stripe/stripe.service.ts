@@ -31,7 +31,7 @@ export class StripeService {
   }
 
   async getActiveStripePrices(){
-    return this.stripe.prices.list({active: true, limit: 100});
+    return this.stripe.prices.list({active: true, limit: 60});
   }
 
   async getStripePriceById(id: string){
