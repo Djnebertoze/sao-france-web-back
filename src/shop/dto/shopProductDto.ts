@@ -6,6 +6,7 @@ export class ShopProductDto {
     imageUrl?: string;
     categorieId?: string;
     stripeLink?: string;
+    active: boolean;
     descriptionDetails?: string;
     // Only if categorieId == points
     pointsToGive?: number;

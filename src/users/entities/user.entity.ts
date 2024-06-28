@@ -9,6 +9,7 @@ export class UserEntity {
   profilePicture: string;
   phoneNumber?: string;
   birthday?: string;
+  showBirthday: boolean;
   shopPoints: number;
   acceptEmails: boolean;
   bio?: string;

@@ -15,8 +15,6 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-
-
   @Prop({ required: false })
   firstName: string;
 
@@ -28,6 +26,9 @@ export class User {
 
   @Prop({ required: false })
   birthday: string;
+
+  @Prop({ required: true, default: false })
+  showBirthday: boolean;
 
   @Prop({
     default:

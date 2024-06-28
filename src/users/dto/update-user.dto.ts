@@ -7,4 +7,6 @@ export class UpdateUserDto {
   readonly profilePicture?: string;
   readonly birthday?: string;
   readonly bio?: string;
+  readonly showBirthday?: boolean;
+  readonly acceptEmails?: boolean;
 }

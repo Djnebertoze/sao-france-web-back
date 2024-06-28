@@ -29,11 +29,9 @@ export class UsersService {
 
     private jwtService: JwtService,
     private mailSenderService: MailSenderService
-  ) {
-  }
+  ) { }
 
   async create(createUserDto: CreateUserDto) {
-    console.log(process.env.JWT_SECRET);
     const hashed = await bcrypt.hash(createUserDto.password, 10);
 
     try {
@@ -214,6 +212,7 @@ export class UsersService {
         "roles",
         "username",
         "birthday",
+        "showBirthday",
         "shopPoints",
         "bio",
         'acceptEmails'
@@ -247,7 +246,9 @@ export class UsersService {
         "createdAt",
         "username",
         "roles",
-        "bio"
+        "bio",
+        "showBirthday",
+        "birthday"
       ]);
 
       const mcProfile = await this.mcProfileModel.findOne({ user: id }, [
@@ -759,6 +760,9 @@ export class UsersService {
     }
 
   }
+
+
+
 
   /*async uploadProfilePicture(file: Express.Multer.File, user: UserEntity) {
     const fileName = await this.awsS3Service.uploadImage(file, 'profile-pictures/');

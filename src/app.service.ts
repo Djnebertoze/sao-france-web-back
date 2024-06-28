@@ -37,7 +37,8 @@ export class AppService {
             descriptionDetails: shopProduct.descriptionDetails,
             pointsToGive: shopProduct.pointsToGive,
             roleToGive: shopProduct.roleToGive,
-            cosmeticToGive: shopProduct.cosmeticToGive
+            cosmeticToGive: shopProduct.cosmeticToGive,
+            active: true
           })
         }
       }

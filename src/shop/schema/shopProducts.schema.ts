@@ -43,6 +43,9 @@ export class ShopProduct {
 
   @Prop({ required: false })
   cosmeticToGive: string | undefined;
+
+  @Prop({ required: true, default: true })
+  active: boolean;
 }
 
 export const ShopProductSchema = SchemaFactory.createForClass(ShopProduct);

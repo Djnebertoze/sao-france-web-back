@@ -12,17 +12,50 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  /**
+ * Check login credentials of a user
+ *
+ * @param email - The email of the user trying to log in
+ * @param password - The password of the user trying to log in
+ *
+ * @returns A Promise that resolves to the user object if the credentials are valid,
+ *          otherwise it resolves to null.
+ *
+ * @throws Will throw an error if there is a problem with the database connection or
+ *          if the bcrypt compare function fails.
+ *
+ * @remarks This function is used to validate the user's credentials before generating
+ *          a JWT token. It uses the bcrypt library to compare the hashed password stored
+ *          in the database with the password provided by the user.
+ */
+async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findOneAuth(email);
     const isMatch = await bcrypt.compare(password, user.password);
     if (user && isMatch) {
-      const { ...result } = user;
+      const {...result } = user;
       return result;
     }
     return null;
-  }
+}
 
-  async getOrGenerateJwt(user: User) {
+/**
+ * This function is responsible for generating or retrieving a JWT token for a user.
+ * It first checks if the user exists and if the provided password is correct.
+ * If the user exists and the password is valid, it checks if a JWT token already exists for the user.
+ * If a token exists, it checks if it has expired. If the token has expired, it deletes the existing token and creates a new one.
+ * If no token exists, it creates a new one.
+ *
+ * @param user - The user object containing the username and password.
+ *
+ * @returns A Promise that resolves to the user token object if successful.
+ *          If the user does not exist, it resolves to a status 404 object with a message.
+ *          If the password is incorrect, it resolves to a status 401 object with a message.
+ *          If an error occurs during the process, it resolves to a status 500 object with a message.
+ *
+ * @throws Will throw an error if there is a problem with the database connection or
+ *          if the JWT service fails to sign or verify the token.
+ */
+async getOrGenerateJwt(user: User) {
     try {
       const currentUser: UserEntity = await this.usersService.findOneByUsername(
         user.username,
@@ -45,7 +78,6 @@ export class AuthService {
       );
       const payload = { _id: currentUser._id, email: currentUser.email };
 
-      //if (currentUser.isVerified === true) {
       // Creates a new Token
       if (!userToken) {
         const newAccessToken = this.jwtService.sign(payload);
@@ -78,18 +110,12 @@ export class AuthService {
         });
       }
       return userToken;
-      /*} else {
-        throw new ForbiddenException();
-      }*/
     } catch (error) {
       console.log(error)
-      throw new HttpException(
-        {
-          statusCode: error.status,
-          message: error.message,
-        },
-        error.status,
-      );
+      return {
+        status: 500,
+        message: 'Internal error'
+      }
     }
   }
 }

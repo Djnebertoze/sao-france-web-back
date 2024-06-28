@@ -39,6 +39,11 @@ export class ShopController {
     return this.shopService.getProducts();
   }
 
+  @Get('products/active')
+  getActiveProducts(){
+    return this.shopService.getActiveProducts();
+  }
+
   @Get('product/:id')
   getProduct(@Param('id') id: string){
     return this.shopService.getProduct(id);

@@ -38,10 +38,27 @@ export class StripeService {
     return this.stripe.prices.retrieve(id)
   }
 
+  /**
+   * This function generates a Stripe payment link for a given user and product.
+   *
+   * @param user - The user for whom the payment link is being generated.
+   * @param productId - The ID of the product for which the payment link is being generated.
+   *
+   * @returns A promise that resolves to the URL of the generated Stripe payment link.
+   *
+   * @throws Will throw an error if the product ID is not found or if there is an issue with the Stripe API.
+   */
   async getStripePaymentLink(user:UserEntity, productId: string) {
+    // Retrieve the Stripe product ID associated with the given product ID
     const productStripeId = await this.shopService.getProduct(productId).then((product) => product.product.stripeLink)
+
+    // Retrieve the default price of the Stripe product
     const productPrice = await this.stripe.products.retrieve(productStripeId).then((product) => product.default_price);
+
+    // Generate a timestamp for the payment link
     const date = new Date().getTime().toString()
+
+    // Create a new Stripe checkout session
     const session = await this.stripe.checkout.sessions.create({
       line_items: [
         {
@@ -58,9 +75,30 @@ export class StripeService {
         date: `${date}`
       }
     })
+
+    // Return the URL of the generated Stripe payment link
     return session.url
   }
 
+  /**
+   * This function updates the Stripe payment status to 'confirmed' for a given user and product.
+   * It checks the validity of the status and session ID, retrieves the user's MC profile,
+   * retrieves the Stripe session, checks if the session ID is already used, retrieves the shop product,
+   * retrieves the corresponding Stripe product, creates a transaction, and expires the session.
+   *
+   * @param user - The user for whom the payment status is being updated.
+   * @param productId - The ID of the product for which the payment status is being updated.
+   * @param body - The request body containing the status and session ID.
+   * @body.status - The status to be checked.
+   * @body.session_id - The Stripe session ID.
+   *
+   * @returns A promise that resolves to an object containing the HTTP status code and message.
+   * @returns.statusCode - The HTTP status code.
+   * @returns.message - The message indicating the success or failure of the operation.
+   *
+   * @throws Will throw an error if the status is not valid, the session ID is not valid,
+   * the session ID is already used, or if the product cannot be found.
+   */
   async updateStripePaymentStatusToSuccess(user: UserEntity, productId: string, body: { status: string, session_id: string}) {
     if ((user._id.toString().split('').reverse().join('') + productId.split('').reverse().join('')) == body.status){
       const mcProfile = await this.mcProfileModel.findOne({ user: user })
