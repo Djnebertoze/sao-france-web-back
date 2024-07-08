@@ -43,6 +43,8 @@ export class ShopService {
       const descriptionDetails:string = createShopProductDto.descriptionDetails
       const pointsToGive:number = createShopProductDto.pointsToGive
       const roleToGive:string = createShopProductDto.roleToGive
+      const roleInitial:string = createShopProductDto.roleInitial
+      const roleFinal:string = createShopProductDto.roleFinal
       const cosmeticToGive:string = createShopProductDto.cosmeticToGive
       const bonusShopPoints:number = createShopProductDto.bonusShopPoints
 
@@ -59,7 +61,9 @@ export class ShopService {
         pointsToGive: pointsToGive,
         roleToGive: roleToGive,
         cosmeticToGive: cosmeticToGive,
-        bonusShopPoints: bonusShopPoints
+        bonusShopPoints: bonusShopPoints,
+        roleInitial: roleInitial,
+        roleFinal: roleFinal,
       })
       return { success: true };
 
@@ -338,7 +342,9 @@ async payProductWithShopPoints(productId: string, user:UserEntity) {
         stripeLink: null,
         place: null,
         bonusShopPoints: null,
-        active: true
+        active: true,
+        roleInitial: null,
+        roleFinal: null
       },
       mcProfile: null,
       cost: 0,
@@ -379,7 +385,9 @@ async payProductWithShopPoints(productId: string, user:UserEntity) {
             stripeLink: null,
             place: null,
             bonusShopPoints: null,
-            active: true
+            active: true,
+            roleInitial: null,
+            roleFinal: null,
           },
           mcProfile: null,
           cost: 0,

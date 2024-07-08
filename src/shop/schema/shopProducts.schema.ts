@@ -42,6 +42,12 @@ export class ShopProduct {
   roleToGive: string | undefined;
 
   @Prop({ required: false })
+  roleInitial: string | undefined;
+
+  @Prop({ required: false })
+  roleFinal: string | undefined;
+
+  @Prop({ required: false })
   cosmeticToGive: string | undefined;
 
   @Prop({ required: true, default: true })
